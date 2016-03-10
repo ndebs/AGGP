@@ -4,8 +4,8 @@
 #	Noelie		Marianne		Nathalie		Vincent		#
 #############################################################
 import matplotlib.pyplot as pyplot
-import numpy as numpy
-import math as maths
+import numpy as np
+import math 
 import networkx as networkx
 
 
@@ -18,10 +18,10 @@ class Network(object):
 	# Constructor
 	def __init__(self,n=1,randomly=True):
 		self.n = n
-		self.g = numpy.zeros(shape=(self.n,self.n), dtype=numpy.int8)
+		self.g = np.zeros(shape=(self.n,self.n), dtype=np.int8)
 		for i in xrange(0,self.n,1):
 			for j in xrange(i+1,self.n,1):
-				self.g[i,j] = numpy.random.random_integers(low=0, high=1, size=None)
+				self.g[i,j] = np.random.random_integers(low=0, high=1, size=None)
 				self.g[j,i] = self.g[i,j] # Symmetrical matrix
 
 
@@ -68,6 +68,29 @@ class Network(object):
 		# pyplot.show()
 		return "\nNetwork display saved.\n"
 
+	def cliqueCost(self,coeffA,coeffB):
+		l=self.g.shape[0]
+		k=np.zeros(l)
+		c=np.zeros(l)
+		i=0
+		while i<l:
+			j=0
+			while j<l:
+				if self.g[i,j]==1:
+					k[i]+=1
+					m=j
+					while m<l:
+						if self.g[i,m]==1 and self.g[j,m]==1:
+							c[i]+=1
+						m+=1
+				j+=1
+			if k[i]>1: # avoid to divide by 0
+				c[i]=(2*c[i])/(k[i]*(k[i]-1))
+			i+=1
+		a,b=np.polyfit(k,c,1) # polynomial regression, degree one
+		cost=coeffA*abs(a)+coeffB*(b-np.mean(c))
+		return cost
+
 
 
 
@@ -83,6 +106,8 @@ def main():
 	print n.g
 	print n.get_degrees()
 	print n
+	cost=n.cliqueCost(1,1)
+	print cost
 	
 
 	print "\nExcecution successful."
