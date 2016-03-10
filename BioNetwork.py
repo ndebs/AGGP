@@ -19,10 +19,12 @@ class Network(object):
 	def __init__(self,n=1):
 		self.n = n
 		self.g = np.zeros(shape=(self.n,self.n), dtype=np.int8)
+		self.cost=0
 		for i in xrange(0,self.n,1):
 			for j in xrange(i+1,self.n,1):
 				self.g[i,j] = np.random.random_integers(low=0, high=1, size=None)
 				self.g[j,i] = self.g[i,j] # Symmetrical matrix
+
 
 
 	def get_degrees(self):
@@ -73,7 +75,7 @@ class Network(object):
 
 
 
-	def cliqueCost(self,coeffA,coeffB):
+	def cliqueCost(self,coeffA=1,coeffB=1):
 		l=self.g.shape[0]
 		k=np.zeros(l)
 		c=np.zeros(l)
@@ -103,6 +105,7 @@ class Network(object):
 #============================================================================================================================
 #						Main Script
 #============================================================================================================================
+
 def main():
 	print "\n-----------------------------------------------------------------\n"
 
