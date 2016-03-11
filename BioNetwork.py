@@ -114,7 +114,7 @@ def main():
 	print n.g
 	print n.get_degrees()
 	#print n
-	cost=n.cliqueCost(1,1)
+	n.cliqueCost(1,1)
 	
 
 	print "\nExcecution successful."
