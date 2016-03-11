@@ -34,34 +34,37 @@ class Network(object):
 		gx = networkx.to_networkx_graph(data=self.g)
 		# Parameters
 		deg = self.get_degrees()
-		size_deg = [100*i/float(max(deg)) for i in deg]
+		size_deg = [(10+(90*(i-min(deg)))/float(max(deg))) for i in deg] # size_deg = [(100*i/float(max(deg))) for i in deg]
+		numlabels = False
+		edgecolor = 'grey'
+		nodecmap = pyplot.cm.rainbow
 		# Draw the graph with Matplotlib
 		fig1 = pyplot.figure()
-		networkx.draw(gx, with_labels=False, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=pyplot.cm.rainbow, node_color=deg)
+		networkx.draw(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot1.png")
 		# Draw the graph with Matplotlib
 		fig2 = pyplot.figure()
-		networkx.draw_networkx(gx, with_labels=False, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=pyplot.cm.rainbow, node_color=deg)
+		networkx.draw_networkx(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot2-networkx.png")
 		# Draw the graph with a circular layout.
 		fig3 = pyplot.figure()
-		networkx.draw_circular(gx, with_labels=False, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=pyplot.cm.rainbow, node_color=deg)
+		networkx.draw_circular(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot3-circular.png")
 		# Draw the graph with a random layout.
 		fig4 = pyplot.figure()
-		networkx.draw_random(gx, with_labels=False, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=pyplot.cm.rainbow, node_color=deg)
+		networkx.draw_random(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot4-random.png")
 		# Draw the graph with a spectral layout.
 		fig5 = pyplot.figure()
-		networkx.draw_spectral(gx, with_labels=False, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=pyplot.cm.rainbow, node_color=deg)
+		networkx.draw_spectral(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot5-spectral.png")
 		# Draw the graph with a spring layout.
 		fig6 = pyplot.figure()
-		networkx.draw_spring(gx, with_labels=False, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=pyplot.cm.rainbow, node_color=deg)
+		networkx.draw_spring(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot6-spring.png")
 		# Draw the graph with a shell layout.
 		fig7 = pyplot.figure()
-		networkx.draw_shell(gx, with_labels=False, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=pyplot.cm.rainbow, node_color=deg)
+		networkx.draw_shell(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot7-shell.png")
 		# pyplot.draw()
 		# pyplot.show()
@@ -147,7 +150,7 @@ def main():
 	n = Network(n=15)
 	print n.g
 	print n.get_degrees()
-	#print n
+	print n
 	n.cliqueCost(1,1)
 	print "Dist:\n",n.pairedShortestPaths()
 	print n.matrixToDistribution(n.dist)
