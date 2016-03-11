@@ -19,7 +19,8 @@ class Network(object):
 	def __init__(self,n=1):
 		self.n = n
 		self.g = np.zeros(shape=(self.n,self.n), dtype=np.int8)
-		self.cost=0
+		self.cost=0 # sum of the 3 costs
+		self.costClique=0
 		for i in xrange(0,self.n,1):
 			for j in xrange(i+1,self.n,1):
 				self.g[i,j] = np.random.random_integers(low=0, high=1, size=None)
@@ -96,7 +97,7 @@ class Network(object):
 				c[i]=(2*c[i])/(k[i]*(k[i]-1))
 			i+=1
 		a,b=np.polyfit(k,c,1) # polynomial regression, degree one
-		self.cost=coeffA*abs(a)+coeffB*(b-np.mean(c))
+		self.costClique=coeffA*abs(a)+coeffB*(b-np.mean(c))
 	
 
 
