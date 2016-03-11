@@ -95,8 +95,8 @@ class Network(object):
 				c[i]=(2*c[i])/(k[i]*(k[i]-1))
 			i+=1
 		a,b=np.polyfit(k,c,1) # polynomial regression, degree one
-		cost=coeffA*abs(a)+coeffB*(b-np.mean(c))
-		return cost
+		self.cost=coeffA*abs(a)+coeffB*(b-np.mean(c))
+		
 
 
 
@@ -113,12 +113,12 @@ def main():
 	n = Network(n=15)
 	print n.g
 	print n.get_degrees()
-	print n
+	#print n
 	cost=n.cliqueCost(1,1)
-	print cost
 	
 
 	print "\nExcecution successful."
 	print "-----------------------------------------------------------------\n"
 
 main()
+
