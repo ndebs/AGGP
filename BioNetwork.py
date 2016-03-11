@@ -28,14 +28,6 @@ class Network(object):
 
 
 
-	def get_degrees(self):
-		degrees = []
-		for i in xrange(0,self.n,1):
-			degrees.append( sum(self.g[i]) )
-		return degrees
-
-
-
 	# Display network
 	def __str__(self):
 		# Matrix convertion to NetworkX graph:
@@ -74,6 +66,14 @@ class Network(object):
 		# pyplot.draw()
 		# pyplot.show()
 		return "\nNetwork display saved.\n"
+
+
+
+	def get_degrees(self):
+		degrees = []
+		for i in xrange(0,self.n,1):
+			degrees.append( sum(self.g[i]) )
+		return degrees
 
 
 
@@ -133,6 +133,7 @@ class Network(object):
 					if (self.dist[i,j] > self.dist[i,k]+self.dist[k,j]):
 						self.dist[i,j] = self.dist[i,k]+self.dist[k,j]
 		return self.dist.astype(dtype=int)
+
 
 
 #============================================================================================================================
