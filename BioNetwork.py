@@ -97,7 +97,19 @@ class Network(object):
 			i+=1
 		a,b=np.polyfit(k,c,1) # polynomial regression, degree one
 		self.cost=coeffA*abs(a)+coeffB*(b-np.mean(c))
-		
+	
+
+
+	# Return the value repartition of a matrix
+	def matrixToDistribution(self,mat):
+		# Headcount initialized to 0
+		rep = [0]*(np.amax(a=mat)+1)
+		# Compute the distribution
+		for i in xrange(0,self.n,1):
+			for j in xrange(i+1,self.n,1):
+				rep[int(mat[i,j])] += 1
+		return rep
+
 
 
 	# Return the matrix of minimum distances between each pair of nodes
@@ -119,7 +131,7 @@ class Network(object):
 				for j in xrange(0,self.n,1):
 					if (self.dist[i,j] > self.dist[i,k]+self.dist[k,j]):
 						self.dist[i,j] = self.dist[i,k]+self.dist[k,j]
-		return self.dist
+		return self.dist.astype(dtype=int)
 
 
 #============================================================================================================================
@@ -136,9 +148,9 @@ def main():
 	#print n
 	n.cliqueCost(1,1)
 	print "Dist:\n",n.pairedShortestPaths()
+	print n.matrixToDistribution(n.dist)
 
 	print "\nExcecution successful."
 	print "-----------------------------------------------------------------\n"
 
 main()
-
