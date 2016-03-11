@@ -34,6 +34,7 @@ class Network(object):
 		return degrees
 
 
+
 	# Display network
 	def __str__(self):
 		# Matrix convertion to NetworkX graph:
@@ -99,7 +100,26 @@ class Network(object):
 		
 
 
-
+	# Return the matrix of minimum distances between each pair of nodes
+	def pairedShortestPaths(self):
+		self.dist = np.empty(shape=(self.n,self.n))
+		self.dist[:] = float('Inf')
+		# Set path to 0 for each node
+		for i in xrange(0,self.n,1):
+			self.dist [i,i] = 0
+		# Set path to 1 for each edge
+		for i in xrange(0,self.n,1):
+			for j in xrange(i+1,self.n,1):
+				if (self.g[i,j] == 1):
+					self.dist[i,j] = 1
+					self.dist[j,i] = 1
+		# Compute the shortest path for each pair of nodes
+		for k in xrange(0,self.n,1):
+			for i in xrange(0,self.n,1):
+				for j in xrange(0,self.n,1):
+					if (self.dist[i,j] > self.dist[i,k]+self.dist[k,j]):
+						self.dist[i,j] = self.dist[i,k]+self.dist[k,j]
+		return self.dist
 
 
 #============================================================================================================================
@@ -115,7 +135,7 @@ def main():
 	print n.get_degrees()
 	#print n
 	n.cliqueCost(1,1)
-	
+	print "Dist:\n",n.pairedShortestPaths()
 
 	print "\nExcecution successful."
 	print "-----------------------------------------------------------------\n"
