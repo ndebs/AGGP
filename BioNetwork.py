@@ -140,6 +140,45 @@ class Network(object):
 
 
 #============================================================================================================================
+#					Class POPULATION
+#============================================================================================================================
+
+class Population(object):
+
+	def __init__(self,m,n):
+		self.m=m # number of networks in population
+		self.n=n # node number in one network
+		self.graphs=range(m)
+		for i in xrange(m):
+			self.graphs[i]=Network(n=n)
+
+
+	def sdPopCost(self):
+		# Have to add the 2 othets costs
+		meanCostClique=0
+		varCostClique=0
+		for i,e in enumerate(self.graphs):
+			meanCostClique+=e.costClique
+			varCostClique+=math.pow(e.costClique,2)
+		meanCostClique=meanCostClique/self.m
+		varCostClique=(varCostClique/self.m)-math.pow(meanCostClique,2)
+		return math.sqrt(varCostClique)
+
+	def overallCost(self):
+		for i,e in enumerate(self.graphs):
+			e.cost=e.costClique # + others costs
+
+	def averagePopCost(self):
+		# return the average cost of networks in population
+		averageCost=0
+		for i,e in enumerate(self.graphs):
+			averageCost+=e.cost
+		averageCost=averageCost/self.m
+		return averageCost
+
+
+
+#============================================================================================================================
 #						Main Script
 #============================================================================================================================
 
@@ -154,7 +193,17 @@ def main():
 	n.cliqueCost(1,1)
 	print "Dist:\n",n.pairedShortestPaths()
 	print n.matrixToDistribution(n.dist)
-
+	
+	m=2
+	nodes=10
+	print "\n \n Network population: %d graphs with %d nodes " %(nodes,m)
+	P=Population(m,nodes)
+	for i in xrange(m):
+		P.graphs[i].cliqueCost()
+		print P.graphs[i].costClique
+	print "Standard deviance  in population: %f" % P.sdPopCost()
+	P.overallCost()
+	print "Average cost in population: %f " % P.averagePopCost()
 	print "\nExcecution successful."
 	print "-----------------------------------------------------------------\n"
 
