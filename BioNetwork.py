@@ -134,7 +134,7 @@ class Network(object):
 				for j in xrange(0,self.n,1):
 					if (self.dist[i,j] > self.dist[i,k]+self.dist[k,j]):
 						self.dist[i,j] = self.dist[i,k]+self.dist[k,j]
-		return self.dist.astype(dtype=int)
+		self.dist = self.dist.astype(dtype=int)
 
 
 
@@ -147,6 +147,27 @@ class Network(object):
 			pnorm = math.exp(-(x-mean)**2/(2*sd**2))/(sd*math.sqrt(2*math.pi))
 			ref_rep.append( pnorm*sum(range(0,self.n,1)) )
 		return ref_rep
+
+
+
+	# Return the network cost due to the small world constraint
+	def smallWorldCost(self):
+		self.costSmallWorld = 0
+		# Shortest paths between each pair of vertices: self.dist
+		self.pairedShortestPaths()
+		# Shortest paths distribution of the network:
+		self_rep = self.matrixToDistribution(self.dist)
+		# Creation of the reference repartition
+		ref_rep = self.refPathRep(length=len(self_rep))
+		# PRINTS
+		print "Dist:\n",self.dist
+		print "Shortest path distribution:\t",self_rep
+		print "Shortest path normal distribution:\t",ref_rep
+		# Computation of the Sum Square
+		for i in xrange(0,len(self_rep),1):
+			self.costSmallWorld += (self_rep[i] - ref_rep[i])**2
+
+
 
 
 
@@ -198,14 +219,14 @@ def main():
 	print "\n-----------------------------------------------------------------\n"
 
 	# New network:
-	n = Network(n=15)
+	n = Network(n=20)
 	print n.g
 	print n.get_degrees()
 	print n
 	n.cliqueCost(1,1)
-	print "Dist:\n",n.pairedShortestPaths()
-	print "Shortest path distribution:\t",n.matrixToDistribution(n.dist)
-	print "Shortest path normal distribution:\t",n.refPathRep(length=5)
+	n.smallWorldCost()
+	print "Small World Cost =\t",n.costSmallWorld
+
 	
 	m=2
 	nodes=10
