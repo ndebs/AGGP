@@ -146,6 +146,11 @@ class Network(object):
 		for x in xrange(0,length,1):
 			pnorm = math.exp(-(x-mean)**2/(2*sd**2))/(sd*math.sqrt(2*math.pi))
 			ref_rep.append( pnorm*sum(range(0,self.n,1)) )
+		# Complete the repartition until 0
+		while ( pnorm*sum(range(0,self.n,1)) > 0.5 ):
+			x += 1
+			pnorm = math.exp(-(x-mean)**2/(2*sd**2))/(sd*math.sqrt(2*math.pi))
+			ref_rep.append( pnorm*sum(range(0,self.n,1)) )
 		return ref_rep
 
 
@@ -159,6 +164,9 @@ class Network(object):
 		self_rep = self.matrixToDistribution(self.dist)
 		# Creation of the reference repartition
 		ref_rep = self.refPathRep(length=len(self_rep))
+		# If self_rep is shorter than ref_rep
+		while (len(ref_rep)>len(self_rep)):
+			self_rep.append(0)
 		# PRINTS
 		print "Dist:\n",self.dist
 		print "Shortest path distribution:\t",self_rep
