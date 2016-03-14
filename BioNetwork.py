@@ -37,45 +37,44 @@ class Network(object):
 		numlabels = False
 		edgecolor = 'grey'
 		nodecmap = pyplot.cm.rainbow
+		# Test if the figure environment has already been opened:
+		try:
+			fig
+		except: # No figure environment opened yet
+			fig = pyplot.figure() # Opens a figure environment
+		else: # Figure environment already yet
+			pyplot.clf()
 		# Draw the graph with Matplotlib
-		fig1 = pyplot.figure()
 		networkx.draw(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot1.png")
 		pyplot.clf()
 		# Draw the graph with Matplotlib
-		fig2 = pyplot.figure()
 		networkx.draw_networkx(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot2-networkx.png")
 		pyplot.clf()
 		# Draw the graph with a circular layout.
-		fig3 = pyplot.figure()
 		networkx.draw_circular(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot3-circular.png")
 		pyplot.clf()
 		# Draw the graph with a random layout.
-		fig4 = pyplot.figure()
 		networkx.draw_random(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot4-random.png")
 		pyplot.clf()
 		# Draw the graph with a spectral layout.
-		fig5 = pyplot.figure()
 		networkx.draw_spectral(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot5-spectral.png")
 		pyplot.clf()
 		# Draw the graph with a spring layout.
-		fig6 = pyplot.figure()
 		networkx.draw_spring(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot6-spring.png")
 		pyplot.clf()
 		# Draw the graph with a shell layout.
-		fig7 = pyplot.figure()
 		networkx.draw_shell(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot7-shell.png")
 		pyplot.clf()
 		# pyplot.draw()
-		# pyplot.show()
-		pyplot.clf()
-		pyplot.close("all")
+		# pyplot.show()	
+		# pyplot.close(fig)
 		return "\nNetwork display saved.\n"
 
 
@@ -184,7 +183,13 @@ class Network(object):
 		for i in xrange(0,len(self_rep),1):
 			self.costSmallWorld += (self_rep[i] - ref_rep[i])**2
 		if ( plot==True ):
-			fig = pyplot.figure() # Opens a figure environment
+			# Test if the figure environment has already been opened:
+			try:
+				fig
+			except: # No figure environment opened yet
+				fig = pyplot.figure() # Opens a figure environment
+			else: # Figure environment already yet
+				pyplot.clf()
 			pyplot.plot(range(0,len(self_rep),1), self_rep, label='Network shortest path distribution', linestyle='--', marker='o', linewidth=1, markersize=5, color='red')
 			pyplot.plot(range(0,len(self_rep),1), ref_rep, label='Normal shortest path distribution', linestyle='-', marker='.', linewidth=1, markersize=10, color='blue')
 			# Plot Parameters
@@ -193,6 +198,7 @@ class Network(object):
 			pyplot.legend(fontsize=10) #adds a legend
 			pyplot.show()
 			pyplot.clf()
+			pyplot.close(fig)
 
 
 
@@ -264,6 +270,8 @@ def main():
 	print "Standard deviance  in population: %f" % P.sdPopCost()
 	P.overallCost()
 	print "Average cost in population: %f " % P.averagePopCost()
+
+
 	print "\nExcecution successful."
 	print "-----------------------------------------------------------------\n"
 
