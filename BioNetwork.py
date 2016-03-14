@@ -9,7 +9,6 @@ import math
 import networkx as networkx
 
 
-
 #============================================================================================================================
 #					Class NETWORK
 #============================================================================================================================
@@ -101,7 +100,7 @@ class Network(object):
 			i+=1
 		a,b=np.polyfit(k,c,1) # polynomial regression, degree one
 		self.costClique=coeffA*abs(a)+coeffB*(b-np.mean(c))
-	
+
 
 
 	# Return the value repartition of a matrix
@@ -110,7 +109,7 @@ class Network(object):
 		rep = [0]*(np.amax(a=mat)+1)
 		# Compute the distribution
 		for i in xrange(0,self.n,1):
-			for j in xrange(i+1,self.n,1):
+			for j in xrange(i,self.n,1):
 				rep[int(mat[i,j])] += 1
 		return rep
 
@@ -136,6 +135,19 @@ class Network(object):
 					if (self.dist[i,j] > self.dist[i,k]+self.dist[k,j]):
 						self.dist[i,j] = self.dist[i,k]+self.dist[k,j]
 		return self.dist.astype(dtype=int)
+
+
+
+	# Return the repartition vector of a noral path distribution
+	def refPathRep(self,length):
+		ref_rep = []
+		sd = 1
+		mean = math.log(math.log(self.n))
+		for x in xrange(0,length,1):
+			pnorm = math.exp(-(x-mean)**2/(2*sd**2))/(sd*math.sqrt(2*math.pi))
+			ref_rep.append( pnorm*sum(range(0,self.n,1)) )
+		return ref_rep
+
 
 
 
@@ -192,7 +204,8 @@ def main():
 	print n
 	n.cliqueCost(1,1)
 	print "Dist:\n",n.pairedShortestPaths()
-	print n.matrixToDistribution(n.dist)
+	print "Shortest path distribution:\t",n.matrixToDistribution(n.dist)
+	print "Shortest path normal distribution:\t",n.refPathRep(length=5)
 	
 	m=2
 	nodes=10
