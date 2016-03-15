@@ -20,6 +20,7 @@ class Network(object):
 		self.g = np.zeros(shape=(self.n,self.n), dtype=np.int8)
 		self.cost=0 # sum of the 3 costs
 		self.costClique=0
+		self.costSmallWorld=0
 		for i in xrange(0,self.n,1):
 			for j in xrange(i+1,self.n,1):
 				self.g[i,j] = np.random.random_integers(low=0, high=1, size=None)
@@ -176,9 +177,11 @@ class Network(object):
 		while (len(ref_rep)>len(self_rep)):
 			self_rep.append(0)
 		# PRINTS
+		"""
 		print "Dist:\n",self.dist
 		print "Shortest path distribution:\t",self_rep
 		print "Shortest path normal distribution:\t",ref_rep
+		"""
 		# Computation of the Sum Square
 		for i in xrange(0,len(self_rep),1):
 			self.costSmallWorld += (self_rep[i] - ref_rep[i])**2
@@ -219,26 +222,43 @@ class Population(object):
 
 
 	def sdPopCost(self):
-		# Have to add the 2 othets costs
+		# return the 3 meands and variances of the costs, output data are arranged in alphabetical order
 		meanCostClique=0
 		varCostClique=0
+		meanCostSmallWorld=0
+		varCostSmallWorld=0
+		meanCostPowerLaw=0
+		varCostPowerLaw=0
 		for i,e in enumerate(self.graphs):
+			#Calculation for cliques
 			meanCostClique+=e.costClique
 			varCostClique+=math.pow(e.costClique,2)
+			#Calculation for small world
+			meanCostSmallWorld+=e.costSmallWorld
+			varCostSmallWorld+=math.pow(e.costSmallWorld,2)
+			#Calculation for power law
+			# COMING SOON
 		meanCostClique=meanCostClique/self.m
 		varCostClique=(varCostClique/self.m)-math.pow(meanCostClique,2)
-		return math.sqrt(varCostClique)
+		meanCostSmallWorld=meanCostSmallWorld/self.m
+		varCostSmallWorld=(varCostSmallWorld/self.m)-math.pow(meanCostSmallWorld,2)
+		return [meanCostClique, math.sqrt(varCostClique), meanCostSmallWorld, math.sqrt(varCostSmallWorld)]
 
 	def overallCost(self):
+		sdCost=self.sdPopCost()
 		for i,e in enumerate(self.graphs):
-			e.cost=e.costClique # + others costs
+			#Normalization of the 3 costs
+			e.cost=(e.costClique-sdCost[0])/sdCost[1]+(e.costSmallWorld-sdCost[2])/sdCost[3] # + others costs
 
 	def averagePopCost(self):
 		# return the average cost of networks in population
 		averageCost=0
 		for i,e in enumerate(self.graphs):
-			averageCost+=e.cost
-		averageCost=averageCost/self.m
+			averageCost=averageCost+e.cost
+		#print averageCost
+		averageCost=averageCost/float(self.m)
+		print "Average cost in population:"
+		print averageCost
 		return averageCost
 
 
@@ -251,6 +271,7 @@ def main():
 	print "\n-----------------------------------------------------------------\n"
 
 	# New network:
+	
 	n = Network(n=15)
 	print n.g
 	print n.get_degrees()
@@ -258,18 +279,18 @@ def main():
 	n.cliqueCost(1,1)
 	n.smallWorldCost(plot=True)
 	print "Small World Cost =\t",n.costSmallWorld
-
 	
-	m=2
+	m=5
 	nodes=10
-	print "\n \n Network population: %d graphs with %d nodes " %(nodes,m)
+	print "\nNetwork population: %d graphs with %d nodes " %(m,nodes)
 	P=Population(m,nodes)
 	for i in xrange(m):
 		P.graphs[i].cliqueCost()
-		print P.graphs[i].costClique
-	print "Standard deviance  in population: %f" % P.sdPopCost()
+		P.graphs[i].smallWorldCost()
+	
+	print "Standard deviance  in population: %f, %f" % (P.sdPopCost()[0], P.sdPopCost()[1])
 	P.overallCost()
-	print "Average cost in population: %f " % P.averagePopCost()
+	P.averagePopCost()
 
 
 	print "\nExcecution successful."
