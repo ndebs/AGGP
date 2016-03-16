@@ -21,6 +21,7 @@ class Network(object):
 		self.cost=0 # sum of the 3 costs
 		self.costClique=0
 		self.costSmallWorld=0
+		self.costDegree=0
 		for i in xrange(0,self.n,1):
 			for j in xrange(i+1,self.n,1):
 				self.g[i,j] = np.random.random_integers(low=0, high=1, size=None)
@@ -221,14 +222,13 @@ class Network(object):
 
 
 	def degreeCost(self,gamma):
-		cost = 0 
+		self.costDegree = 0 
 		degrees,freq_list = self.P_obs()
 		for i in xrange(len(freq_list)-1): 
 			#compute cost (=SCE)
 			fk= freq_list[i]
 			k= degrees[i]
-			cost += (fk - self.P(k,gamma))**2
-		return cost
+			self.costDegree += (fk - self.P(k,gamma))**2
 
 	def d_P(self,k,gamma):
 		return -gamma*k**(-gamma-1)
@@ -332,24 +332,29 @@ class Population(object):
 			meanCostSmallWorld+=e.costSmallWorld
 			varCostSmallWorld+=math.pow(e.costSmallWorld,2)
 			#Calculation for power law
-			# COMING SOON
+			meanCostPowerLaw+=e.costDegree
+			varCostPowerLaw+=math.pow(e.costDegree,2)
+
 		meanCostClique=meanCostClique/self.m
 		varCostClique=(varCostClique/self.m)-math.pow(meanCostClique,2)
 		meanCostSmallWorld=meanCostSmallWorld/self.m
 		varCostSmallWorld=(varCostSmallWorld/self.m)-math.pow(meanCostSmallWorld,2)
-		return [meanCostClique, math.sqrt(varCostClique), meanCostSmallWorld, math.sqrt(varCostSmallWorld)]
+		meanCostPowerLaw=meanCostPowerLaw/self.m
+		varCostPowerLaw=(varCostPowerLaw/self.m)-math.pow(meanCostPowerLaw,2)
+		return [meanCostClique, math.sqrt(varCostClique), meanCostSmallWorld, math.sqrt(varCostSmallWorld), meanCostPowerLaw, math.sqrt(varCostPowerLaw)]
 
 	def overallCost(self):
 		sdCost=self.sdPopCost()
+		print sdCost
 		for i,e in enumerate(self.graphs):
-			#Normalization of the 3 costs
-			e.cost=(e.costClique-sdCost[0])/sdCost[1]+(e.costSmallWorld-sdCost[2])/sdCost[3] # + others costs
+			#Normalization of the 3 costs and sum of them 
+			e.cost=(e.costClique-sdCost[0])/sdCost[1]+(e.costSmallWorld-sdCost[2])/sdCost[3] + (e.costDegree-sdCost[4])/sdCost[5]
 
 	def averagePopCost(self):
 		# return the average cost of networks in population
 		averageCost=0
 		for i,e in enumerate(self.graphs):
-			averageCost=averageCost+e.cost
+			averageCost+=e.cost
 		#print averageCost
 		averageCost=averageCost/float(self.m)
 		print "Average cost in population:"
@@ -380,18 +385,19 @@ def main():
 	# POWER DEGREE
 	maxit=1000
 	gamma_opti=n.algo_LM(maxit)
-	cost=n.degreeCost(gamma_opti)
+	n.degreeCost(gamma_opti) 
 	print "gamma", gamma_opti
-	print "cost degree", cost
+	print "cost degree", n.costDegree
 	n.plot_freq_degree(gamma_opti)
 	
 	m=5
 	nodes=10
 	print "\nNetwork population: %d graphs with %d nodes " %(m,nodes)
 	P=Population(m,nodes)
-	for i in xrange(m):
-		P.graphs[i].cliqueCost()
-		P.graphs[i].smallWorldCost()
+	for i,G in enumerate(P.graphs):
+		G.cliqueCost()
+		G.smallWorldCost()
+		G.degreeCost(G.algo_LM(maxit))
 	
 	print "Standard deviance  in population: %f, %f" % (P.sdPopCost()[0], P.sdPopCost()[1])
 	P.overallCost()
