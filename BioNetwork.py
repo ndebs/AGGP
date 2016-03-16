@@ -7,6 +7,8 @@ import matplotlib.pyplot as pyplot
 import numpy as np
 import math 
 import networkx as networkx
+import random
+
 
 
 #============================================================================================================================
@@ -78,6 +80,19 @@ class Network(object):
 		for i in xrange(0,self.n,1):
 			degrees.append( sum(self.g[i]) )
 		return degrees
+
+
+	def mutation(self,mut_rate):
+		for i in xrange(0,self.n,1):
+			for j in xrange(i+1,self.n,1):
+				rand_freq = random.uniform(0,1)
+				if rand_freq< mut_rate:
+					if self.g[i,j] == 1:
+						self.g[i,j] = 0
+						self.g[j,i] = self.g[i,j]
+					if self.g[i,j] == 0:
+						self.g[i,j] = 1
+						self.g[j,i] =  self.g[i,j]						
 
 
 
