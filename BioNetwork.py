@@ -276,7 +276,7 @@ class Network(object):
 			H_LM = self.d2_degreeCost(gamma)*(1+lamb)
 			d_LM = -Grad_gamma/H_LM
 			new_cost = self.degreeCost(gamma+d_LM)
-			print "cost","new_cost", cost, new_cost
+			#print "cost","new_cost", cost, new_cost
 			if new_cost<cost:
 			#change gamma
 				cost = new_cost
