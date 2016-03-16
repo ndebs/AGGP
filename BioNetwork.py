@@ -28,6 +28,14 @@ class Network(object):
 			for j in xrange(i+1,self.n,1):
 				self.g[i,j] = np.random.random_integers(low=0, high=1, size=None)
 				self.g[j,i] = self.g[i,j] # Symmetrical matrix
+			# Prevent the construction of a graph with a non-connected node
+			if (sum(self.g[i])==0):
+				# Additon of a random vertex
+				r = np.random.random_integers(low=0, high=self.n-1, size=None)
+				if (i==r):
+					r = np.random.random_integers(low=0, high=self.n-1, size=None)
+				self.g[i,r] = 1
+				self.g[r,i] = self.g[i,r] # Symmetrical matrix
 
 
 
@@ -86,13 +94,21 @@ class Network(object):
 		for i in xrange(0,self.n,1):
 			for j in xrange(i+1,self.n,1):
 				rand_freq = random.uniform(0,1)
-				if rand_freq< mut_rate:
+				if rand_freq < mut_rate:
 					if self.g[i,j] == 1:
 						self.g[i,j] = 0
 						self.g[j,i] = self.g[i,j]
 					if self.g[i,j] == 0:
 						self.g[i,j] = 1
-						self.g[j,i] =  self.g[i,j]						
+						self.g[j,i] =  self.g[i,j]
+			# Prevent the mutation of a graph with a non-connected node
+			if (sum(self.g[i])==0):
+				# Additon of a random vertex
+				r = np.random.random_integers(low=0, high=self.n-1, size=None)
+				if (i==r):
+					r = np.random.random_integers(low=0, high=self.n-1, size=None)
+				self.g[i,r] = 1
+				self.g[r,i] = self.g[i,r] # Symmetrical matrix
 
 
 
@@ -124,7 +140,7 @@ class Network(object):
 
 
 ############################################################################################################################################
-#                              CONSTRAINT SMALL WORD
+#                              CONSTRAINT SMALL WORLD
 ############################################################################################################################################
 
 	# Return the value repartition of a matrix
@@ -134,6 +150,13 @@ class Network(object):
 		# Compute the distribution
 		for i in xrange(0,self.n,1):
 			for j in xrange(i,self.n,1):
+				# try:
+				# 	rep[int(mat[i,j])]
+				# except: 
+				# 	print self.g
+				# 	print self
+				# 	print mat
+				# 	print "index=",int(mat[i,j]),"\t len(rep)=",len(rep),"\t rep=",rep
 				rep[int(mat[i,j])] += 1
 		return rep
 
