@@ -38,13 +38,6 @@ class Network(object):
 		numlabels = False
 		edgecolor = 'grey'
 		nodecmap = pyplot.cm.rainbow
-		# Test if the figure environment has already been opened:
-		try:
-			fig
-		except: # No figure environment opened yet
-			fig = pyplot.figure() # Opens a figure environment
-		else: # Figure environment already yet
-			pyplot.clf()
 		# Draw the graph with Matplotlib
 		networkx.draw(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot1.png")
@@ -75,7 +68,6 @@ class Network(object):
 		pyplot.clf()
 		# pyplot.draw()
 		# pyplot.show()	
-		# pyplot.close(fig)
 		return "\nNetwork display saved.\n"
 
 
@@ -194,12 +186,12 @@ class Network(object):
 			self.costSmallWorld += (self_rep[i] - ref_rep[i])**2
 		if ( plot==True ):
 			# Test if the figure environment has already been opened:
-			try:
-				fig
-			except: # No figure environment opened yet
-				fig = pyplot.figure() # Opens a figure environment
-			else: # Figure environment already yet
-				pyplot.clf()
+			# try:
+			# 	fig
+			# except: # No figure environment opened yet
+			# 	fig = pyplot.figure() # Opens a figure environment
+			# else: # Figure environment already yet
+			# 	pyplot.clf()
 			pyplot.plot(range(0,len(self_rep),1), self_rep, label='Network shortest path distribution', linestyle='--', marker='o', linewidth=1, markersize=5, color='red')
 			pyplot.plot(range(0,len(self_rep),1), ref_rep, label='Normal shortest path distribution', linestyle='-', marker='.', linewidth=1, markersize=10, color='blue')
 			# Plot Parameters
@@ -208,7 +200,6 @@ class Network(object):
 			pyplot.legend(fontsize=10) #adds a legend
 			pyplot.show()
 			pyplot.clf()
-			pyplot.close(fig)
 
 ############################################################################################################################################
 #                              CONSTRAINT POWER DEGREE
