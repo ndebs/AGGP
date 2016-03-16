@@ -88,6 +88,10 @@ class Network(object):
 
 
 
+############################################################################################################################################
+#                              CONSTRAINT CLIQUE
+############################################################################################################################################
+
 	def cliqueCost(self,coeffA=1,coeffB=1):
 		l=self.g.shape[0]
 		k=np.zeros(l)
@@ -111,6 +115,9 @@ class Network(object):
 		self.costClique=coeffA*abs(a)+coeffB*(b-np.mean(c))
 
 
+############################################################################################################################################
+#                              CONSTRAINT SMALL WORD
+############################################################################################################################################
 
 	# Return the value repartition of a matrix
 	def matrixToDistribution(self,mat):
@@ -203,8 +210,105 @@ class Network(object):
 			pyplot.clf()
 			pyplot.close(fig)
 
+############################################################################################################################################
+#                              CONSTRAINT POWER DEGREE
+############################################################################################################################################
+
+	def P(self,k,gamma):
+		return k**(-gamma)
+
+	
+	def P_obs(self):
+		x_list=range(1,20)
+		l = self.get_degrees() #list of all degrees (for each node)
+		freq_list= []
+		for i in x_list:
+			ni= l.count(i) #ni = number of nodes of degree i
+			freq_list.append(float(ni)/float(self.n))
+		return (x_list,freq_list)
 
 
+
+	def degreeCost(self,gamma):
+		cost = 0 
+		degrees,freq_list = self.P_obs()
+		for i in xrange(len(freq_list)-1): 
+			#compute cost (=SCE)
+			fk= freq_list[i]
+			k= degrees[i]
+			cost += (fk - self.P(k,gamma))**2
+		return cost
+
+	def d_P(self,k,gamma):
+		return -gamma*k**(-gamma-1)
+
+	def d_degreeCost(self,gamma):
+		d = 0 
+		degrees,freq_list = self.P_obs()
+		for i in xrange(len(freq_list)-1): 
+			fk= freq_list[i]
+			k= degrees[i]
+			d += (fk - self.P(k,gamma))*self.d_P(k,gamma)
+		return -d
+		
+
+	def d2_degreeCost(self,gamma):
+		d2 = 0 
+		degrees,freq_list = self.P_obs()
+		for i in xrange(len(freq_list)-1): 
+			k= degrees[i]
+			d2 += self.d_P(k,gamma)**2 
+		return d2
+		
+
+	def algo_LM(self,maxit):
+		#initialisation of at 2
+		gamma = 2
+		#definition of a parameter lambda for LM algo
+		lamb = 0.001
+		cost = self.degreeCost(gamma)
+		# defintion of the vector d_degreeCost's norm
+		norme_cost = [abs(self.d_degreeCost(gamma))]
+		#iteration until maximum iteration maxit
+		i=0
+		while (i<maxit):
+			Grad_gamma = self.d_degreeCost(gamma)
+			H_LM = self.d2_degreeCost(gamma)*(1+lamb)
+			d_LM = -Grad_gamma/H_LM
+			new_cost = self.degreeCost(gamma+d_LM)
+			print "cost","new_cost", cost, new_cost
+			if new_cost<cost:
+			#change gamma
+				cost = new_cost
+				gamma = gamma+d_LM
+				lamb=lamb/10
+				norme_cost = [abs(self.d_degreeCost(gamma))]
+			else:
+				#don't change gamma
+				lamb=lamb*10
+			i += 1
+		#return gamma optimal
+		return gamma
+
+
+	def plot_freq_degree(self,gamma_opti):
+		y_theo= []
+		y_obs= []
+		k_list=[]
+		x=xrange(1,20)
+		for k in self.get_degrees(): #k = degree of each vertex
+			k_list.append(k)
+			fk=  float(k)/float(self.n)
+			y_obs.append(fk)
+		for i in x:
+			y_theo.append(self.P(i,gamma_opti)) 
+		#print y_obs
+		pyplot.plot(x,y_theo,label='Theoric degree distribution', linestyle='--', marker='o', linewidth=1, markersize=5, color='red')
+		#pyplot.plot(k_list,y_obs, label='Observed distribution', marker='+', linewidth=1, markersize=10, color='blue')
+		pyplot.hist(k_list,normed=1,label='Observed distribution')
+		pyplot.xlabel("degree k")
+		pyplot.ylabel("Frequency")
+		pyplot.show()
 
 
 #============================================================================================================================
@@ -276,9 +380,18 @@ def main():
 	print n.g
 	print n.get_degrees()
 	print n
+
+	# CLIQUE COST
 	n.cliqueCost(1,1)
+	# SMALL WORD
 	n.smallWorldCost(plot=True)
 	print "Small World Cost =\t",n.costSmallWorld
+	# POWER DEGREE
+	maxit=1000
+	gamma_opti=n.algo_LM(maxit)
+	cost=n.degreeCost(gamma_opti)
+	print "gamma", gamma_opti
+	print "cost degree", cost
 	
 	m=5
 	nodes=10
