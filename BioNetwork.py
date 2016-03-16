@@ -392,6 +392,7 @@ def main():
 	cost=n.degreeCost(gamma_opti)
 	print "gamma", gamma_opti
 	print "cost degree", cost
+	n.plot_freq_degree(gamma_opti)
 	
 	m=5
 	nodes=10
