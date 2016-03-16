@@ -272,7 +272,8 @@ class Network(object):
 		gamma = 2
 		#definition of a parameter lambda for LM algo
 		lamb = 0.001
-		cost = self.degreeCost(gamma)
+		self.degreeCost(gamma)
+		cost = self.costDegree
 		# defintion of the vector d_degreeCost's norm
 		norme_cost = [abs(self.d_degreeCost(gamma))]
 		#iteration until maximum iteration maxit
@@ -281,7 +282,8 @@ class Network(object):
 			Grad_gamma = self.d_degreeCost(gamma)
 			H_LM = self.d2_degreeCost(gamma)*(1+lamb)
 			d_LM = -Grad_gamma/H_LM
-			new_cost = self.degreeCost(gamma+d_LM)
+			self.degreeCost(gamma+d_LM)
+			new_cost = self.costDegree
 			#print "cost","new_cost", cost, new_cost
 			if new_cost<cost:
 			#change gamma
