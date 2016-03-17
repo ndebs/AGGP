@@ -32,7 +32,7 @@ class Network(object):
 			if (sum(self.g[i])==0):
 				# Additon of a random vertex
 				r = np.random.random_integers(low=0, high=self.n-1, size=None)
-				if (i==r):
+				while (i==r):
 					r = np.random.random_integers(low=0, high=self.n-1, size=None)
 				self.g[i,r] = 1
 				self.g[r,i] = self.g[i,r] # Symmetrical matrix
