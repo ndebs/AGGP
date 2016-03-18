@@ -385,21 +385,41 @@ class Population(object):
 
 	def overallCost(self):
 		sdCost=self.sdPopCost()
+		costpergraph=[]
 		print sdCost
 		for i,e in enumerate(self.graphs):
 			#Normalization of the 3 costs and sum of them 
 			e.cost=(e.costClique-sdCost[0])/sdCost[1]+(e.costSmallWorld-sdCost[2])/sdCost[3] + (e.costDegree-sdCost[4])/sdCost[5]
+			costpergraph.append(e.cost)
+		print "cost per graph"
+		print costpergraph
+		return costpergraph
 
 	def averagePopCost(self):
 		# return the average cost of networks in population
 		averageCost=0
 		for i,e in enumerate(self.graphs):
 			averageCost+=e.cost
-		#print averageCost
 		averageCost=averageCost/float(self.m)
 		print "Average cost in population:"
 		print averageCost
 		return averageCost
+
+	def selection(self,averageCost, costpergraph):
+		for i,e in enumerate(self.graphs):
+			if averageCost < costpergraph[i]: #selection of graph > of the average cost
+				print "Bad graph"
+				print costpergraph[i]
+				print e.get_degrees() #degree before the mutation
+				e.mutation(0.3)       # random mutation rate 
+				print e.get_degrees() # degree after for verification of the mutation 
+
+
+
+				
+				
+				
+
 
 
 
@@ -434,14 +454,17 @@ def main():
 	nodes=10
 	print "\nNetwork population: %d graphs with %d nodes " %(m,nodes)
 	P=Population(m,nodes)
+	
 	for i,G in enumerate(P.graphs):
 		G.cliqueCost()
 		G.smallWorldCost()
 		G.degreeCost(G.algo_LM(maxit))
 	
 	print "Standard deviance  in population: %f, %f" % (P.sdPopCost()[0], P.sdPopCost()[1])
-	P.overallCost()
-	P.averagePopCost()
+	b=P.overallCost()
+	a=P.averagePopCost()
+	P.selection(a,b)
+
 
 
 	print "\nExcecution successful."
