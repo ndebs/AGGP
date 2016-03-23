@@ -439,6 +439,7 @@ class Population(object):
 		print averageCost
 		return averageCost
 
+
 	def selection(self, costpergraph, c=0.5):
 		fitness = [-i for i in costpergraph]
 		rank = scipy.stats.rankdata(fitness)
@@ -464,6 +465,25 @@ class Population(object):
 			print g.cost,
 		print "\n"
 		self.graphs = copy.deepcopy(newPop)
+
+	def crossingOver(self, tx=0.05):
+		p=np.random.binomial(self.m, tx) # p crossing overs have to be made
+		#print p
+		while p>0:
+			i=random.randint(0,self.m-1)
+			j=random.randint(0,self.m-1)
+			while i==j:
+				j=random.randint(0,self.m-1)
+			ncol=random.randint(0,self.n-1) # row/colum to change 
+			#print ncol
+			tempI=self.graphs[i].g[0:self.n,ncol] # intermediar copy is mandatory
+			temp_J=self.graphs[j].g[0:self.n,ncol]
+			self.graphs[i].g[ncol,0:self.n]=temp_J
+			self.graphs[j].g[ncol,0:self.n]=tempI
+			self.graphs[i].g[0:self.n,ncol]=self.graphs[i].g[ncol,0:self.n]
+			self.graphs[j].g[0:self.n,ncol]=self.graphs[j].g[ncol,0:self.n]
+			p-=1
+
 
 
 	def updatePop(self,generation,gamma,c,mut_rate):
@@ -550,14 +570,20 @@ def main():
 	print "Standard deviance  in population: %f, %f" % (P.sdPopCost()[0], P.sdPopCost()[1])
 	b=P.overallCost()
 	a=P.averagePopCost()
-	P.selection(a,b,c=0.5)
 
-
+	print "Test crossing over"
+	P_cross=Population(2,4)
+	print P_cross.graphs[0].g
+	print P_cross.graphs[1].g
+	P_cross.crossingOver()
+	print P_cross.graphs[0].g
+	print P_cross.graphs[1].g
+	P.crossingOver()
 
 	print "\nExcecution successful."
 	print "-----------------------------------------------------------------\n"
 
-# main()
+#main()
 
 P=Population(m=30,n=30)
 P.updatePop(generation=50,gamma=2.2,c=0.75,mut_rate=0.15)
