@@ -77,8 +77,8 @@ class Network(object):
 		networkx.draw_shell(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot7-shell.png")
 		pyplot.clf()
-		pyplot.draw()
-		pyplot.show()	
+		# pyplot.draw()
+		# pyplot.show()	
 		return "\nNetwork display saved.\n"
 
 	def fileCytoscape(self):
@@ -130,6 +130,8 @@ class Network(object):
 		l=self.g.shape[0]
 		k=np.zeros(l)
 		c=np.zeros(l)
+		log_k=np.zeros(l)
+		log_c=np.zeros(l)
 		i=0
 		while i<l:
 			j=0
@@ -144,10 +146,15 @@ class Network(object):
 				j+=1
 			if k[i]>1: # avoid to divide by 0
 				c[i]=(2*c[i])/(k[i]*(k[i]-1))
+			if c[i]<=0:
+				c[i]=0.0000000001
+			log_k[i]=math.log(k[i],10)
+			log_c[i]=math.log(c[i],10)
 			i+=1
-		a,b=np.polyfit(k,c,1) # polynomial regression, degree one, older version
-		for i, e in enumerate(c):
-			self.costClique+=(e-a*k[i])**2
+
+		a,b=np.polyfit(log_k,log_c,1) # polynomial regression, degree one, older version
+		for i, e in enumerate(log_k):
+			self.costClique+=(a*e-e)**2 + 0.05*b # b is minor in the calculation of cost
 		
 
 
