@@ -40,7 +40,7 @@ class Network(object):
 
 
 	# Display network
-	def __str__(self):
+	def __str__(self,ID=''):
 		# Matrix convertion to NetworkX graph:
 		gx = networkx.to_networkx_graph(data=self.g)
 		# Parameters
@@ -49,34 +49,34 @@ class Network(object):
 		numlabels = False
 		edgecolor = 'grey'
 		nodecmap = pyplot.cm.rainbow
-		# Draw the graph with Matplotlib
-		networkx.draw(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
-		pyplot.savefig("NetworkX_plot1.png")
-		pyplot.clf()
-		# Draw the graph with Matplotlib
-		networkx.draw_networkx(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
-		pyplot.savefig("NetworkX_plot2-networkx.png")
-		pyplot.clf()
+		# # Draw the graph with Matplotlib
+		# networkx.draw(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
+		# pyplot.savefig(ID+"NetworkX_plot1.png")
+		# pyplot.clf()
+		# # Draw the graph with Matplotlib
+		# networkx.draw_networkx(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
+		# pyplot.savefig(ID+"NetworkX_plot2-networkx.png")
+		# pyplot.clf()
 		# Draw the graph with a circular layout.
 		networkx.draw_circular(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
-		pyplot.savefig("NetworkX_plot3-circular.png")
+		pyplot.savefig(ID+"NetworkX_plot3-circular.png")
 		pyplot.clf()
-		# Draw the graph with a random layout.
-		networkx.draw_random(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
-		pyplot.savefig("NetworkX_plot4-random.png")
-		pyplot.clf()
-		# Draw the graph with a spectral layout.
-		networkx.draw_spectral(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
-		pyplot.savefig("NetworkX_plot5-spectral.png")
-		pyplot.clf()
-		# Draw the graph with a spring layout.
-		networkx.draw_spring(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
-		pyplot.savefig("NetworkX_plot6-spring.png")
-		pyplot.clf()
-		# Draw the graph with a shell layout.
-		networkx.draw_shell(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
-		pyplot.savefig("NetworkX_plot7-shell.png")
-		pyplot.clf()
+		# # Draw the graph with a random layout.
+		# networkx.draw_random(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
+		# pyplot.savefig(ID+"NetworkX_plot4-random.png")
+		# pyplot.clf()
+		# # Draw the graph with a spectral layout.
+		# networkx.draw_spectral(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
+		# pyplot.savefig(ID+"NetworkX_plot5-spectral.png")
+		# pyplot.clf()
+		# # Draw the graph with a spring layout.
+		# networkx.draw_spring(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
+		# pyplot.savefig(ID+"NetworkX_plot6-spring.png")
+		# pyplot.clf()
+		# # Draw the graph with a shell layout.
+		# networkx.draw_shell(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
+		# pyplot.savefig(ID+"NetworkX_plot7-shell.png")
+		# pyplot.clf()
 		# pyplot.draw()
 		# pyplot.show()
 		return "\nNetwork display saved.\n"
@@ -154,7 +154,7 @@ class Network(object):
 
 		a,b=np.polyfit(log_k,log_c,1) # polynomial regression, degree one, older version
 		for i, e in enumerate(log_k):
-			self.costClique+=(a*e-e)**2 + 0.05*b # b is minor in the calculation of cost
+			self.costClique+=(a*e-e)**2 + 0.05*b*0 # b is minor in the calculation of cost
 		
 
 
@@ -414,14 +414,16 @@ class Population(object):
 		varCostPowerLaw=(varCostPowerLaw/float(self.m))-math.pow(meanCostPowerLaw,2)
 		return [meanCostClique, math.sqrt(math.fabs(varCostClique)), meanCostSmallWorld, math.sqrt(math.fabs(varCostSmallWorld)), meanCostPowerLaw, math.sqrt(math.fabs(varCostPowerLaw))]
 
-	def overallCost(self):
+	def overallCost(self,coeffCli=1,coeffSwl=20,coeffDeg=5):
 		sdCost=self.sdPopCost()
 		costpergraph=[]
 		print sdCost
 		for i,e in enumerate(self.graphs):
 			#Normalization of the 3 costs and sum of them
 			epsilon = 10**(-10)
-			e.cost=(e.costClique-sdCost[0])/float(sdCost[1]+epsilon)+(e.costSmallWorld-sdCost[2])/float(sdCost[3]+epsilon) + (e.costDegree-sdCost[4])/float(sdCost[5]+epsilon)
+			# e.cost=(e.costClique-sdCost[0])/float(sdCost[1]+epsilon)+(e.costSmallWorld-sdCost[2])/float(sdCost[3]+epsilon) + (e.costDegree-sdCost[4])/float(sdCost[5]+epsilon)
+			e.cost= coeffCli*e.costClique + coeffSwl*e.costSmallWorld + coeffDeg*e.costDegree
+			print "Clique = ",coeffCli*e.costClique/e.cost,"\tSW =", coeffSwl*e.costSmallWorld/e.cost, "\tDeg =", coeffDeg*e.costDegree/e.cost
 			costpergraph.append(e.cost)
 		print "cost per graph"
 		print costpergraph
@@ -443,7 +445,7 @@ class Population(object):
 		print fitness,rank
 		# ELITISM
 		# Initiate a new pop with the best graph
-		newPop = [ self.graphs[np.argmax(fitness)] ]
+		newPop = [ copy.deepcopy(self.graphs[np.argmax(fitness)]) ]
 		print "BEST:\tr=",rank[np.argmax(fitness)],"\tfit=",fitness[np.argmax(fitness)]
 		# RANKING
 		Wr = [] # Proba of reproducing (non-normalized)
@@ -465,25 +467,43 @@ class Population(object):
 
 
 	def updatePop(self,generation,gamma,c,mut_rate):
-		# Initial costs
-		for i,G in enumerate(self.graphs):
-			G.cliqueCost()
-			G.smallWorldCost()
-			G.degreeCost(gamma=gamma)
+		# Variable to keep a trace of:
+		minGenerationCost = []
+		bestGenerationCost = []
+		aveGenerationCost = []
 		# Population evolution
-		for g in xrange(0,generation,1):
-			print "\nNEW GENERATION:"
+		for generationNumber in xrange(0,generation,1):
+			# Initial costs
 			print "Initial cost:",
-			for g in self.graphs:
-				print g.cost,
-			print ""
-			self.selection(costpergraph=self.overallCost(), c=c)
+			for i,G in enumerate(self.graphs):
+				G.cliqueCost()
+				G.smallWorldCost()
+				G.degreeCost(gamma=gamma)
+				print G.cost,
+			print "\n------------------------------------\nNEW GENERATION:\t"+str(generationNumber)+"\n-------------------------------------\n"
+			# Save population costs
+			popCost = self.overallCost()
+			minGenerationCost.append(min(popCost))
+			bestGenerationCost.append(self.graphs[0].cost)
+			aveGenerationCost.append(self.averagePopCost())
+			# Selection
+			self.selection(costpergraph=popCost, c=c)
 			# Mutation of each graph (except the best one)
 			for i in xrange(1,self.m,1):
 				self.graphs[i].mutation(mut_rate=mut_rate)
 			# Crossing over
 			# self.crossingOver()
-		print self.graphs[0]
+			self.graphs[0].__str__(ID="0-"+str(generationNumber)+"-")
+			self.graphs[1].__str__(ID="1-"+str(generationNumber)+"-")
+		# Costs plot:
+		pyplot.plot(range(0,generation,1), minGenerationCost, label='Minimum', linestyle='-', marker='.', linewidth=1, markersize=5, color='red')
+		pyplot.plot(range(0,generation,1), bestGenerationCost, label='Best conserved', linestyle='--', marker='.', linewidth=1, markersize=5, color='green')
+		pyplot.plot(range(0,generation,1), aveGenerationCost, label='Average', linestyle='--', marker='.', linewidth=1, markersize=5, color='blue')
+		# Plot Parameters
+		pyplot.xlabel("Shortest path length")
+		pyplot.ylabel("Number")
+		pyplot.legend(fontsize=10) #adds a legend
+		pyplot.show()
 
 
 
@@ -539,5 +559,5 @@ def main():
 
 # main()
 
-P=Population(15,20)
-P.updatePop(generation=20,gamma=2.2,c=0.5,mut_rate=0.05)
+P=Population(m=30,n=30)
+P.updatePop(generation=50,gamma=2.2,c=0.75,mut_rate=0.15)
