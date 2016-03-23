@@ -476,6 +476,25 @@ class Population(object):
 			# 	e.mutation(0.3)       # random mutation rate 
 			# 	print e.get_degrees() # degree after for verification of the mutation 
 
+	def crossingOver(self, tx=0.05):
+		p=np.random.binomial(self.m, tx) # p crossing overs have to be made
+		#print p
+		while p>0:
+			i=random.randint(0,self.m-1)
+			j=random.randint(0,self.m-1)
+			while i==j:
+				j=random.randint(0,self.m-1)
+			ncol=random.randint(0,self.n-1) # row/colum to change 
+			#print ncol
+			tempI=self.graphs[i].g[0:self.n,ncol] # intermediar copy is mandatory
+			temp_J=self.graphs[j].g[0:self.n,ncol]
+			self.graphs[i].g[ncol,0:self.n]=temp_J
+			self.graphs[j].g[ncol,0:self.n]=tempI
+			self.graphs[i].g[0:self.n,ncol]=self.graphs[i].g[ncol,0:self.n]
+			self.graphs[j].g[0:self.n,ncol]=self.graphs[j].g[ncol,0:self.n]
+			p-=1
+
+
 
 
 
@@ -528,7 +547,14 @@ def main():
 	a=P.averagePopCost()
 	P.selection(a,b,c=0.5)
 
-
+	print "Test crossing over"
+	P_cross=Population(2,4)
+	print P_cross.graphs[0].g
+	print P_cross.graphs[1].g
+	P_cross.crossingOver()
+	print P_cross.graphs[0].g
+	print P_cross.graphs[1].g
+	P.crossingOver()
 
 	print "\nExcecution successful."
 	print "-----------------------------------------------------------------\n"
