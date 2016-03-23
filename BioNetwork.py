@@ -77,9 +77,18 @@ class Network(object):
 		networkx.draw_shell(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot7-shell.png")
 		pyplot.clf()
-		# pyplot.draw()
-		# pyplot.show()	
+		pyplot.draw()
+		pyplot.show()	
 		return "\nNetwork display saved.\n"
+
+	def fileCytoscape(self):
+		f=open('graphCytoscape.txt', 'w')
+		for i in xrange(0,self.n,1):
+			for j in xrange(i+1,self.n,1):
+				if self.g[i,j]==1:
+					f.write('%d %d\n' % (i,j))
+		f.close()
+
 
 
 
@@ -463,7 +472,9 @@ def main():
 	n.degreeCost(gamma) 
 	print "cost degree", n.costDegree
 	# n.plot_freq_degree(gamma_opti)
-	
+	n.fileCytoscape()
+	print n
+
 	m=5
 	nodes=10
 	print "\nNetwork population: %d graphs with %d nodes " %(m,nodes)
