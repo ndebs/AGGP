@@ -207,41 +207,51 @@ class Network(object):
 
 	# Return the network cost due to the small world constraint
 	def smallWorldCost(self, plot=False):
-		self.costSmallWorld = 0
 		# Shortest paths between each pair of vertices: self.dist
 		self.pairedShortestPaths()
-		# Shortest paths distribution of the network:
-		self_rep = self.matrixToDistribution(self.dist)
-		# Creation of the reference repartition
-		ref_rep = self.refPathRep(length=len(self_rep))
-		# If self_rep is shorter than ref_rep
-		while (len(ref_rep)>len(self_rep)):
-			self_rep.append(0)
-		# PRINTS
-		"""
-		print "Dist:\n",self.dist
-		print "Shortest path distribution:\t",self_rep
-		print "Shortest path normal distribution:\t",ref_rep
-		"""
-		# Computation of the Sum Square
-		for i in xrange(0,len(self_rep),1):
-			self.costSmallWorld += (self_rep[i] - ref_rep[i])**2
+		averageShortestPaths = np.average(a=self.dist)
+		# Reference mean:
+		meanRef = math.log(math.log(self.n))
+		# Cost:
+		self.costSmallWorld = math.fabs(averageShortestPaths - meanRef)
+
+		# # # Shortest paths distribution of the network:
+		# # self_rep = self.matrixToDistribution(self.dist)
+		# # # Creation of the reference repartition
+		# # ref_rep = self.refPathRep(length=len(self_rep))
+		# # # If self_rep is shorter than ref_rep
+		# # while (len(ref_rep)>len(self_rep)):
+		# # 	self_rep.append(0)
+		# # # PRINTS
+		# # """
+		# # print "Dist:\n",self.dist
+		# # print "Shortest path distribution:\t",self_rep
+		# # print "Shortest path normal distribution:\t",ref_rep
+		# # """
+		# # # Computation of the Sum Square
+		# # for i in xrange(0,len(self_rep),1):
+		# # 	self.costSmallWorld += (self_rep[i] - ref_rep[i])**2
 		if ( plot==True ):
-			# Test if the figure environment has already been opened:
-			# try:
-			# 	fig
-			# except: # No figure environment opened yet
-			# 	fig = pyplot.figure() # Opens a figure environment
-			# else: # Figure environment already yet
-			# 	pyplot.clf()
-			pyplot.plot(range(0,len(self_rep),1), self_rep, label='Network shortest path distribution', linestyle='--', marker='o', linewidth=1, markersize=5, color='red')
-			pyplot.plot(range(0,len(self_rep),1), ref_rep, label='Normal shortest path distribution', linestyle='-', marker='.', linewidth=1, markersize=10, color='blue')
-			# Plot Parameters
-			pyplot.xlabel("Shortest path length")
-			pyplot.ylabel("Number")
-			pyplot.legend(fontsize=10) #adds a legend
-			pyplot.show()
-			pyplot.clf()
+			print "Shortest path between each node:\n",self.dist
+			print "Average shortest path:",averageShortestPaths
+			print "log(log(n)) =",meanRef
+			print "Small World Cost =",self.costSmallWorld
+			# # Test if the figure environment has already been opened:
+			# # try:
+			# # 	fig
+			# # except: # No figure environment opened yet
+			# # 	fig = pyplot.figure() # Opens a figure environment
+			# # else: # Figure environment already yet
+			# # 	pyplot.clf()
+			# pyplot.plot(range(0,len(self_rep),1), self_rep, label='Network shortest path distribution', linestyle='--', marker='o', linewidth=1, markersize=5, color='red')
+			# pyplot.plot(range(0,len(self_rep),1), ref_rep, label='Normal shortest path distribution', linestyle='-', marker='.', linewidth=1, markersize=10, color='blue')
+			# # Plot Parameters
+			# pyplot.xlabel("Shortest path length")
+			# pyplot.ylabel("Number")
+			# pyplot.legend(fontsize=10) #adds a legend
+			# pyplot.show()
+			# pyplot.clf()
+
 
 ############################################################################################################################################
 #                              CONSTRAINT POWER DEGREE
@@ -447,12 +457,12 @@ def main():
 	print "Clique cost ", n.costClique
 	# SMALL WORD
 	n.smallWorldCost(plot=True)
-	print "Small World Cost =\t",n.costSmallWorld
+	# print "Small World Cost =\t",n.costSmallWorld
 	# POWER DEGREE
 	gamma=2.2
 	n.degreeCost(gamma) 
 	print "cost degree", n.costDegree
-	n.plot_freq_degree(gamma)
+	# n.plot_freq_degree(gamma_opti)
 	
 	m=5
 	nodes=10
