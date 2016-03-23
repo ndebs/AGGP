@@ -443,27 +443,27 @@ class Population(object):
 	def selection(self, costpergraph, c=0.5):
 		fitness = [-i for i in costpergraph]
 		rank = scipy.stats.rankdata(fitness)
-		print fitness,rank
+		# print fitness,rank
 		# ELITISM
 		# Initiate a new pop with the best graph
 		newPop = [ copy.deepcopy(self.graphs[np.argmax(fitness)]) ]
-		print "BEST:\tr=",rank[np.argmax(fitness)],"\tfit=",fitness[np.argmax(fitness)]
+		# print "BEST:\tr=",rank[np.argmax(fitness)],"\tfit=",fitness[np.argmax(fitness)]
 		# RANKING
 		Wr = [] # Proba of reproducing (non-normalized)
 		for i,e in enumerate(self.graphs):
 			# Reproduction probability of each graph:
 			Wr.append( self.m*(c-1)*(c**(self.m-rank[i]))/(c**(self.m)-1) )
-			print "r=",rank[i],"\tfit=",fitness[i],"\tProba = ",Wr
+			# print "r=",rank[i],"\tfit=",fitness[i],"\tProba = ",Wr
 		Wr = [i/float(sum(Wr)) for i in Wr]
-		print "Wr = ",Wr
+		# print "Wr = ",Wr
 		nbRepro = np.random.multinomial(n=(self.m-1), pvals=Wr, size=None)
 		print nbRepro
 		for i,e in enumerate(self.graphs):
 			for j in xrange(1,nbRepro[i]+1,1):
 				newPop.append( copy.deepcopy(e) )
-		for g in newPop:
-			print g.cost,
-		print "\n"
+		# for g in newPop:
+		# 	print g.cost,
+		# print "\n"
 		self.graphs = copy.deepcopy(newPop)
 
 	def crossingOver(self, tx=0.05):
@@ -486,7 +486,7 @@ class Population(object):
 
 
 
-	def updatePop(self,generation,gamma,c,mut_rate):
+	def updatePop(self,generation,gamma,c,mut_rate,cro_rate):
 		# Variable to keep a trace of:
 		minGenerationCost = []
 		bestGenerationCost = []
@@ -494,12 +494,12 @@ class Population(object):
 		# Population evolution
 		for generationNumber in xrange(0,generation,1):
 			# Initial costs
-			print "Initial cost:",
+			# print "Initial cost:",
 			for i,G in enumerate(self.graphs):
 				G.cliqueCost()
 				G.smallWorldCost()
 				G.degreeCost(gamma=gamma)
-				print G.cost,
+				# print G.cost,
 			print "\n------------------------------------\nNEW GENERATION:\t"+str(generationNumber)+"\n-------------------------------------\n"
 			# Save population costs
 			popCost = self.overallCost()
@@ -512,9 +512,10 @@ class Population(object):
 			for i in xrange(1,self.m,1):
 				self.graphs[i].mutation(mut_rate=mut_rate)
 			# Crossing over
-			# self.crossingOver()
+			self.crossingOver(tx=cro_rate)
 			self.graphs[0].__str__(ID="0-"+str(generationNumber)+"-")
 			self.graphs[1].__str__(ID="1-"+str(generationNumber)+"-")
+		self.graphs[0].fileCytoscape()
 		# Costs plot:
 		pyplot.plot(range(0,generation,1), minGenerationCost, label='Minimum', linestyle='-', marker='.', linewidth=1, markersize=5, color='red')
 		pyplot.plot(range(0,generation,1), bestGenerationCost, label='Best conserved', linestyle='--', marker='.', linewidth=1, markersize=5, color='green')
@@ -585,5 +586,5 @@ def main():
 
 #main()
 
-P=Population(m=30,n=30)
-P.updatePop(generation=50,gamma=2.2,c=0.75,mut_rate=0.15)
+P=Population(m=50,n=30)
+P.updatePop(generation=10,gamma=2.2,c=0.75,mut_rate=0.15,cro_rate=0.05)
