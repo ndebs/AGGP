@@ -77,13 +77,8 @@ class Network(object):
 		networkx.draw_shell(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		pyplot.savefig("NetworkX_plot7-shell.png")
 		pyplot.clf()
-<<<<<<< HEAD
-		pyplot.draw()
-		pyplot.show()
-=======
 		# pyplot.draw()
-		# pyplot.show()	
->>>>>>> a6e7e14708b1c04d4748505880ffd70803900d49
+		# pyplot.show()
 		return "\nNetwork display saved.\n"
 
 	def fileCytoscape(self):
@@ -411,21 +406,22 @@ class Population(object):
 			meanCostPowerLaw+=e.costDegree
 			varCostPowerLaw+=math.pow(e.costDegree,2)
 
-		meanCostClique=meanCostClique/self.m
-		varCostClique=(varCostClique/self.m)-math.pow(meanCostClique,2)
-		meanCostSmallWorld=meanCostSmallWorld/self.m
-		varCostSmallWorld=(varCostSmallWorld/self.m)-math.pow(meanCostSmallWorld,2)
-		meanCostPowerLaw=meanCostPowerLaw/self.m
-		varCostPowerLaw=(varCostPowerLaw/self.m)-math.pow(meanCostPowerLaw,2)
-		return [meanCostClique, math.sqrt(varCostClique), meanCostSmallWorld, math.sqrt(varCostSmallWorld), meanCostPowerLaw, math.sqrt(varCostPowerLaw)]
+		meanCostClique=meanCostClique/float(self.m)
+		varCostClique=(varCostClique/float(self.m))-math.pow(meanCostClique,2)
+		meanCostSmallWorld=meanCostSmallWorld/float(self.m)
+		varCostSmallWorld=(varCostSmallWorld/float(self.m))-math.pow(meanCostSmallWorld,2)
+		meanCostPowerLaw=meanCostPowerLaw/float(self.m)
+		varCostPowerLaw=(varCostPowerLaw/float(self.m))-math.pow(meanCostPowerLaw,2)
+		return [meanCostClique, math.sqrt(math.fabs(varCostClique)), meanCostSmallWorld, math.sqrt(math.fabs(varCostSmallWorld)), meanCostPowerLaw, math.sqrt(math.fabs(varCostPowerLaw))]
 
 	def overallCost(self):
 		sdCost=self.sdPopCost()
 		costpergraph=[]
 		print sdCost
 		for i,e in enumerate(self.graphs):
-			#Normalization of the 3 costs and sum of them 
-			e.cost=(e.costClique-sdCost[0])/sdCost[1]+(e.costSmallWorld-sdCost[2])/sdCost[3] + (e.costDegree-sdCost[4])/sdCost[5]
+			#Normalization of the 3 costs and sum of them
+			epsilon = 10**(-10)
+			e.cost=(e.costClique-sdCost[0])/float(sdCost[1]+epsilon)+(e.costSmallWorld-sdCost[2])/float(sdCost[3]+epsilon) + (e.costDegree-sdCost[4])/float(sdCost[5]+epsilon)
 			costpergraph.append(e.cost)
 		print "cost per graph"
 		print costpergraph
@@ -441,7 +437,7 @@ class Population(object):
 		print averageCost
 		return averageCost
 
-	def selection(self,averageCost, costpergraph, c=0.5):
+	def selection(self, costpergraph, c=0.5):
 		fitness = [-i for i in costpergraph]
 		rank = scipy.stats.rankdata(fitness)
 		print fitness,rank
@@ -464,8 +460,30 @@ class Population(object):
 				newPop.append( copy.deepcopy(e) )
 		for g in newPop:
 			print g.cost,
+		print "\n"
 		self.graphs = copy.deepcopy(newPop)
 
+
+	def updatePop(self,generation,gamma,c,mut_rate):
+		# Initial costs
+		for i,G in enumerate(self.graphs):
+			G.cliqueCost()
+			G.smallWorldCost()
+			G.degreeCost(gamma=gamma)
+		# Population evolution
+		for g in xrange(0,generation,1):
+			print "\nNEW GENERATION:"
+			print "Initial cost:",
+			for g in self.graphs:
+				print g.cost,
+			print ""
+			self.selection(costpergraph=self.overallCost(), c=c)
+			# Mutation of each graph (except the best one)
+			for i in xrange(1,self.m,1):
+				self.graphs[i].mutation(mut_rate=mut_rate)
+			# Crossing over
+			# self.crossingOver()
+		print self.graphs[0]
 
 
 
@@ -519,4 +537,7 @@ def main():
 	print "\nExcecution successful."
 	print "-----------------------------------------------------------------\n"
 
-main()
+# main()
+
+P=Population(15,20)
+P.updatePop(generation=20,gamma=2.2,c=0.5,mut_rate=0.05)
