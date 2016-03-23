@@ -8,8 +8,8 @@ import numpy as np
 import math 
 import networkx as networkx
 import random
-
-
+import scipy.stats
+import copy as copy
 
 #============================================================================================================================
 #					Class NETWORK
@@ -436,20 +436,51 @@ class Population(object):
 		print averageCost
 		return averageCost
 
-	def selection(self,averageCost, costpergraph):
+	def selection(self,averageCost, costpergraph, c=0.5):
+		fitness = [-i for i in costpergraph]
+		rank = scipy.stats.rankdata(fitness)
+		print fitness,rank
+		# ELITISM
+		# Initiate a new pop with the best graph
+		newPop = [ self.graphs[np.argmax(fitness)] ]
+		newPoprk = [ rank[np.argmax(fitness)] ]
+		print "BEST:\tr=",rank[np.argmax(fitness)],"\tfit=",fitness[np.argmax(fitness)]
+		# RANKING
+		Wr = [] # Proba of reproducing (non-normalized)
 		for i,e in enumerate(self.graphs):
-			if averageCost < costpergraph[i]: #selection of graph > of the average cost
-				print "Bad graph"
-				print costpergraph[i]
-				print e.get_degrees() #degree before the mutation
-				e.mutation(0.3)       # random mutation rate 
-				print e.get_degrees() # degree after for verification of the mutation 
+			# Reproduction probability of each graph:
+			Wr.append( self.m*(c-1)*(c**(self.m-rank[i]))/(c**(self.m)-1) )
+			print "r=",rank[i],"\tfit=",fitness[i],"\tProba = ",Wr
+		Wr = [i/float(sum(Wr)) for i in Wr]
+		print "Wr = ",Wr
+		Wp = [0] # Sumed proba of reproducing (normalized)
+		for i in Wr:
+			Wp.append( Wp[-1]+i )
+		Wp.pop(0)
+		print "Wp = ",Wp
+		probaRepro = np.sort(np.random.random(size=self.m-1))
+		print "Repro = ", probaRepro
+		j = 0 # Index in Wp
+		for i in probaRepro:
+			while(i>Wp[j]):
+				j += 1
+			if(i<Wp[j]):
+				newPop.append( copy.deepcopy(self.graphs[j]) )
+				newPoprk.append( rank[j] )
+		print "New pop = ",newPoprk
+
+			# if averageCost < costpergraph[i]: #selection of graph > of the average cost
+			# 	print "Bad graph"
+			# 	print costpergraph[i]
+			# 	print e.get_degrees() #degree before the mutation
+			# 	e.mutation(0.3)       # random mutation rate 
+			# 	print e.get_degrees() # degree after for verification of the mutation 
 
 
 
-				
-				
-				
+
+
+
 
 
 
@@ -495,7 +526,7 @@ def main():
 	print "Standard deviance  in population: %f, %f" % (P.sdPopCost()[0], P.sdPopCost()[1])
 	b=P.overallCost()
 	a=P.averagePopCost()
-	P.selection(a,b)
+	P.selection(a,b,c=0.5)
 
 
 
