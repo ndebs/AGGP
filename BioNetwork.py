@@ -116,7 +116,8 @@ class Network(object):
 #                              CONSTRAINT CLIQUE
 ############################################################################################################################################
 
-	def cliqueCost(self,coeffA=1,coeffB=1):
+	def cliqueCost(self):
+		self.costClique=0
 		l=self.g.shape[0]
 		k=np.zeros(l)
 		c=np.zeros(l)
@@ -135,8 +136,10 @@ class Network(object):
 			if k[i]>1: # avoid to divide by 0
 				c[i]=(2*c[i])/(k[i]*(k[i]-1))
 			i+=1
-		a,b=np.polyfit(k,c,1) # polynomial regression, degree one
-		self.costClique=coeffA*abs(a)+coeffB*(b-np.mean(c))
+		a,b=np.polyfit(k,c,1) # polynomial regression, degree one, older version
+		for i, e in enumerate(c):
+			self.costClique+=(e-a*k[i])**2
+		
 
 
 ############################################################################################################################################
@@ -268,6 +271,25 @@ class Network(object):
 			k= degrees[i]
 			self.costDegree += (fk - self.P(k,gamma))**2
 
+	def plot_freq_degree(self,gamma_opti):
+		y_theo= []
+		y_obs= []
+		k_list=[]
+		x=xrange(1,20)
+		for k in self.get_degrees(): #k = degree of each vertex
+			k_list.append(k)
+			fk=  float(k)/float(self.n)
+			y_obs.append(fk)
+		for i in x:
+			y_theo.append(self.P(i,gamma_opti)) 
+		#print y_obs
+		pyplot.plot(x,y_theo,label='Theoric degree distribution', linestyle='--', marker='o', linewidth=1, markersize=5, color='red')
+		#pyplot.plot(k_list,y_obs, label='Observed distribution', marker='+', linewidth=1, markersize=10, color='blue')
+		pyplot.hist(k_list,normed=1,label='Observed distribution')
+		pyplot.xlabel("degree k")
+		pyplot.ylabel("Frequency")
+		pyplot.show()
+'''
 	def d_P(self,k,gamma):
 		return -gamma*k**(-gamma-1)
 
@@ -320,26 +342,9 @@ class Network(object):
 			i += 1
 		#return gamma optimal
 		return gamma
+'''
 
 
-	def plot_freq_degree(self,gamma_opti):
-		y_theo= []
-		y_obs= []
-		k_list=[]
-		x=xrange(1,20)
-		for k in self.get_degrees(): #k = degree of each vertex
-			k_list.append(k)
-			fk=  float(k)/float(self.n)
-			y_obs.append(fk)
-		for i in x:
-			y_theo.append(self.P(i,gamma_opti)) 
-		#print y_obs
-		pyplot.plot(x,y_theo,label='Theoric degree distribution', linestyle='--', marker='o', linewidth=1, markersize=5, color='red')
-		#pyplot.plot(k_list,y_obs, label='Observed distribution', marker='+', linewidth=1, markersize=10, color='blue')
-		pyplot.hist(k_list,normed=1,label='Observed distribution')
-		pyplot.xlabel("degree k")
-		pyplot.ylabel("Frequency")
-		pyplot.show()
 
 
 #============================================================================================================================
@@ -438,17 +443,16 @@ def main():
 	print n
 
 	# CLIQUE COST
-	n.cliqueCost(1,1)
+	n.cliqueCost()
+	print "Clique cost ", n.costClique
 	# SMALL WORD
 	n.smallWorldCost(plot=True)
 	print "Small World Cost =\t",n.costSmallWorld
 	# POWER DEGREE
-	maxit=1000
-	gamma_opti=n.algo_LM(maxit)
-	n.degreeCost(gamma_opti) 
-	print "gamma", gamma_opti
+	gamma=2.2
+	n.degreeCost(gamma) 
 	print "cost degree", n.costDegree
-	n.plot_freq_degree(gamma_opti)
+	n.plot_freq_degree(gamma)
 	
 	m=5
 	nodes=10
@@ -458,7 +462,7 @@ def main():
 	for i,G in enumerate(P.graphs):
 		G.cliqueCost()
 		G.smallWorldCost()
-		G.degreeCost(G.algo_LM(maxit))
+		G.degreeCost(gamma)
 	
 	print "Standard deviance  in population: %f, %f" % (P.sdPopCost()[0], P.sdPopCost()[1])
 	b=P.overallCost()
