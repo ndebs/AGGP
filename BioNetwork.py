@@ -78,7 +78,7 @@ class Network(object):
 		pyplot.savefig("NetworkX_plot7-shell.png")
 		pyplot.clf()
 		pyplot.draw()
-		pyplot.show()	
+		pyplot.show()
 		return "\nNetwork display saved.\n"
 
 	def fileCytoscape(self):
@@ -436,7 +436,6 @@ class Population(object):
 		# ELITISM
 		# Initiate a new pop with the best graph
 		newPop = [ self.graphs[np.argmax(fitness)] ]
-		newPoprk = [ rank[np.argmax(fitness)] ]
 		print "BEST:\tr=",rank[np.argmax(fitness)],"\tfit=",fitness[np.argmax(fitness)]
 		# RANKING
 		Wr = [] # Proba of reproducing (non-normalized)
@@ -446,32 +445,14 @@ class Population(object):
 			print "r=",rank[i],"\tfit=",fitness[i],"\tProba = ",Wr
 		Wr = [i/float(sum(Wr)) for i in Wr]
 		print "Wr = ",Wr
-		Wp = [0] # Sumed proba of reproducing (normalized)
-		for i in Wr:
-			Wp.append( Wp[-1]+i )
-		Wp.pop(0)
-		print "Wp = ",Wp
-		probaRepro = np.sort(np.random.random(size=self.m-1))
-		print "Repro = ", probaRepro
-		j = 0 # Index in Wp
-		for i in probaRepro:
-			while(i>Wp[j]):
-				j += 1
-			if(i<Wp[j]):
-				newPop.append( copy.deepcopy(self.graphs[j]) )
-				newPoprk.append( rank[j] )
-		print "New pop = ",newPoprk
-
-			# if averageCost < costpergraph[i]: #selection of graph > of the average cost
-			# 	print "Bad graph"
-			# 	print costpergraph[i]
-			# 	print e.get_degrees() #degree before the mutation
-			# 	e.mutation(0.3)       # random mutation rate 
-			# 	print e.get_degrees() # degree after for verification of the mutation 
-
-
-
-
+		nbRepro = np.random.multinomial(n=(self.m-1), pvals=Wr, size=None)
+		print nbRepro
+		for i,e in enumerate(self.graphs):
+			for j in xrange(1,nbRepro[i]+1,1):
+				newPop.append( copy.deepcopy(e) )
+		for g in newPop:
+			print g.cost,
+		self.graphs = copy.deepcopy(newPop)
 
 
 
@@ -490,7 +471,7 @@ def main():
 	n = Network(n=15)
 	print n.g
 	print n.get_degrees()
-	print n
+	# print n
 
 	# CLIQUE COST
 	n.cliqueCost()
