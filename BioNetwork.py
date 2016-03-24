@@ -21,6 +21,7 @@ class Network(object):
 		self.n = n
 		self.g = np.zeros(shape=(self.n,self.n), dtype=np.int8)
 		self.cost=0 # sum of the 3 costs
+		self.costRelative=0 # sum of the 3 costs
 		self.costClique=0
 		self.costSmallWorld=0
 		self.costDegree=0
@@ -414,20 +415,39 @@ class Population(object):
 		varCostPowerLaw=(varCostPowerLaw/float(self.m))-math.pow(meanCostPowerLaw,2)
 		return [meanCostClique, math.sqrt(math.fabs(varCostClique)), meanCostSmallWorld, math.sqrt(math.fabs(varCostSmallWorld)), meanCostPowerLaw, math.sqrt(math.fabs(varCostPowerLaw))]
 
-	def overallCost(self,coeffCli=1,coeffSwl=20,coeffDeg=5):
+	def overallCost(self):#,coeffCli=1,coeffSwl=20,coeffDeg=5):
 		sdCost=self.sdPopCost()
-		costpergraph=[]
-		print sdCost
+		costPerGraph=[]
+		costPerGraphClique=[]
+		costPerGraphSwallWorld=[]
+		costPerGraphDegree=[]
+		costPerGraphRelative=[]
+		# print "SD",sdCost
+		# Save costs of the population in vectors
 		for i,e in enumerate(self.graphs):
-			#Normalization of the 3 costs and sum of them
+			costPerGraphClique.append(e.costClique)
+			costPerGraphSwallWorld.append(e.costSmallWorld)
+			costPerGraphDegree.append(e.costDegree)
+			print "Clique = ",e.costClique,"\tSW =",e.costSmallWorld, "\tDeg =",e.costDegree 
+		maxCosts = [max(costPerGraphClique),max(costPerGraphSwallWorld),max(costPerGraphDegree)]
+		print "maxCosts = ",maxCosts
+		"""for i,e in enumerate(self.graphs): # Normalization of the 3 costs and sum of them
 			epsilon = 10**(-10)
 			# e.cost=(e.costClique-sdCost[0])/float(sdCost[1]+epsilon)+(e.costSmallWorld-sdCost[2])/float(sdCost[3]+epsilon) + (e.costDegree-sdCost[4])/float(sdCost[5]+epsilon)
 			e.cost= coeffCli*e.costClique + coeffSwl*e.costSmallWorld + coeffDeg*e.costDegree
 			print "Clique = ",coeffCli*e.costClique/e.cost,"\tSW =", coeffSwl*e.costSmallWorld/e.cost, "\tDeg =", coeffDeg*e.costDegree/e.cost
-			costpergraph.append(e.cost)
-		print "cost per graph"
-		print costpergraph
-		return costpergraph
+			costPerGraph.append(e.cost)"""
+		for i,e in enumerate(self.graphs):
+			# Absolute costs (used for plotting)
+			e.cost = costPerGraphClique[i]+costPerGraphSwallWorld[i]+costPerGraphDegree[i]
+			# print "Graph cost", e.cost
+			costPerGraph.append(e.cost)
+			# Relative costs
+			e.costRelative = costPerGraphClique[i]/float(3*maxCosts[0])+costPerGraphSwallWorld[i]/float(3*maxCosts[1])+costPerGraphDegree[i]/float(3*maxCosts[2])
+			costPerGraphRelative.append(e.costRelative)
+		print "Absolute cost per graph = ",costPerGraph
+		print "Relative cost per graph = ",costPerGraphRelative
+		return costPerGraph,costPerGraphRelative
 
 	def averagePopCost(self):
 		# return the average cost of networks in population
@@ -440,12 +460,13 @@ class Population(object):
 		return averageCost
 
 
-	def selection(self, costpergraph, c=0.5):
-		fitness = [-i for i in costpergraph]
+	def selection(self, costPerGraph, c=0.5):
+		fitness = [1-i for i in costPerGraph]
 		rank = scipy.stats.rankdata(fitness)
-		# print fitness,rank
+		print "Fitness:",fitness,"\nRank:",rank
 		# ELITISM
 		# Initiate a new pop with the best graph
+		print "Argmax =",np.argmax(fitness)
 		newPop = [ copy.deepcopy(self.graphs[np.argmax(fitness)]) ]
 		# print "BEST:\tr=",rank[np.argmax(fitness)],"\tfit=",fitness[np.argmax(fitness)]
 		# RANKING
@@ -457,7 +478,7 @@ class Population(object):
 		Wr = [i/float(sum(Wr)) for i in Wr]
 		# print "Wr = ",Wr
 		nbRepro = np.random.multinomial(n=(self.m-1), pvals=Wr, size=None)
-		print nbRepro
+		print "Offspring: ",nbRepro
 		for i,e in enumerate(self.graphs):
 			for j in xrange(1,nbRepro[i]+1,1):
 				newPop.append( copy.deepcopy(e) )
@@ -466,14 +487,15 @@ class Population(object):
 		# print "\n"
 		self.graphs = copy.deepcopy(newPop)
 
+
 	def crossingOver(self, tx=0.05):
 		p=np.random.binomial(self.m, tx) # p crossing overs have to be made
 		#print p
 		while p>0:
-			i=random.randint(0,self.m-1)
-			j=random.randint(0,self.m-1)
+			i=random.randint(1,self.m-1)
+			j=random.randint(1,self.m-1)
 			while i==j:
-				j=random.randint(0,self.m-1)
+				j=random.randint(1,self.m-1)
 			ncol=random.randint(0,self.n-1) # row/colum to change 
 			#print ncol
 			tempI=self.graphs[i].g[0:self.n,ncol] # intermediar copy is mandatory
@@ -502,12 +524,14 @@ class Population(object):
 				# print G.cost,
 			print "\n------------------------------------\nNEW GENERATION:\t"+str(generationNumber)+"\n-------------------------------------\n"
 			# Save population costs
-			popCost = self.overallCost()
-			minGenerationCost.append(min(popCost))
+			popAboluteCost,popRelativeCost = self.overallCost() # ABOLUTE,RELATIVE
+			print "Min abs = ",min(popAboluteCost)
+			print "Best = ",self.graphs[0].cost
+			minGenerationCost.append(min(popAboluteCost))
 			bestGenerationCost.append(self.graphs[0].cost)
 			aveGenerationCost.append(self.averagePopCost())
 			# Selection
-			self.selection(costpergraph=popCost, c=c)
+			self.selection(costPerGraph=popRelativeCost, c=c)
 			# Mutation of each graph (except the best one)
 			for i in xrange(1,self.m,1):
 				self.graphs[i].mutation(mut_rate=mut_rate)
@@ -586,5 +610,5 @@ def main():
 
 #main()
 
-P=Population(m=50,n=30)
-P.updatePop(generation=10,gamma=2.2,c=0.75,mut_rate=0.15,cro_rate=0.05)
+P=Population(m=10,n=25)
+P.updatePop(generation=10,gamma=2.2,c=0.5,mut_rate=0.15,cro_rate=0.05)
