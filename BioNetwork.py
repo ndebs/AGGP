@@ -27,7 +27,7 @@ class Network(object):
 		self.costDegree=0
 		for i in xrange(0,self.n,1):
 			for j in xrange(i+1,self.n,1):
-				self.g[i,j] = np.random.random_integers(low=0, high=1, size=None)
+				self.g[i,j] = np.random.binomial(n=1, p=5/float(self.n), size=None) #np.random.random_integers(low=0, high=1, size=None)
 				self.g[j,i] = self.g[i,j] # Symmetrical matrix
 			# Prevent the construction of a graph with a non-connected node
 			if (sum(self.g[i])==0):
@@ -59,17 +59,17 @@ class Network(object):
 		# pyplot.savefig(ID+"NetworkX_plot2-networkx.png")
 		# pyplot.clf()
 		# Draw the graph with a circular layout.
-		networkx.draw_circular(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
-		pyplot.savefig(ID+"NetworkX_plot3-circular.png")
-		pyplot.clf()
+		# networkx.draw_circular(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
+		# pyplot.savefig(ID+"NetworkX_plot3-circular.png")
+		# pyplot.clf()
 		# # Draw the graph with a random layout.
 		# networkx.draw_random(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		# pyplot.savefig(ID+"NetworkX_plot4-random.png")
 		# pyplot.clf()
-		# # Draw the graph with a spectral layout.
-		# networkx.draw_spectral(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
-		# pyplot.savefig(ID+"NetworkX_plot5-spectral.png")
-		# pyplot.clf()
+		# Draw the graph with a spectral layout.
+		networkx.draw_spectral(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
+		pyplot.savefig(ID+"NetworkX_plot5-spectral.png")
+		pyplot.clf()
 		# # Draw the graph with a spring layout.
 		# networkx.draw_spring(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		# pyplot.savefig(ID+"NetworkX_plot6-spring.png")
@@ -279,14 +279,13 @@ class Network(object):
 
 	
 	def P_obs(self):
-		x_list=range(1,20)
 		l = self.get_degrees() #list of all degrees (for each node)
+		x_list=range(1,max(l)+1)
 		freq_list= []
 		for i in x_list:
 			ni= l.count(i) #ni = number of nodes of degree i
 			freq_list.append(float(ni)/float(self.n))
 		return (x_list,freq_list)
-
 
 
 	def degreeCost(self,gamma):
@@ -302,8 +301,9 @@ class Network(object):
 		y_theo= []
 		y_obs= []
 		k_list=[]
-		x=xrange(1,20)
-		for k in self.get_degrees(): #k = degree of each vertex
+		l = self.get_degrees() #list of all degrees (for each node)
+		x=xrange(1,max(l)+1)
+		for k in l: #k = degree of each vertex
 			k_list.append(k)
 			fk=  float(k)/float(self.n)
 			y_obs.append(fk)
@@ -415,6 +415,7 @@ class Population(object):
 		varCostPowerLaw=(varCostPowerLaw/float(self.m))-math.pow(meanCostPowerLaw,2)
 		return [meanCostClique, math.sqrt(math.fabs(varCostClique)), meanCostSmallWorld, math.sqrt(math.fabs(varCostSmallWorld)), meanCostPowerLaw, math.sqrt(math.fabs(varCostPowerLaw))]
 
+
 	def overallCost(self):#,coeffCli=1,coeffSwl=20,coeffDeg=5):
 		sdCost=self.sdPopCost()
 		costPerGraph=[]
@@ -428,7 +429,7 @@ class Population(object):
 			costPerGraphClique.append(e.costClique)
 			costPerGraphSwallWorld.append(e.costSmallWorld)
 			costPerGraphDegree.append(e.costDegree)
-			print "Clique = ",e.costClique,"\tSW =",e.costSmallWorld, "\tDeg =",e.costDegree 
+			# print i," Clique = ",e.costClique,"\tSW =",e.costSmallWorld, "\tDeg =",e.costDegree 
 		maxCosts = [max(costPerGraphClique),max(costPerGraphSwallWorld),max(costPerGraphDegree)]
 		print "maxCosts = ",maxCosts
 		"""for i,e in enumerate(self.graphs): # Normalization of the 3 costs and sum of them
@@ -445,9 +446,10 @@ class Population(object):
 			# Relative costs
 			e.costRelative = costPerGraphClique[i]/float(3*maxCosts[0])+costPerGraphSwallWorld[i]/float(3*maxCosts[1])+costPerGraphDegree[i]/float(3*maxCosts[2])
 			costPerGraphRelative.append(e.costRelative)
-		print "Absolute cost per graph = ",costPerGraph
-		print "Relative cost per graph = ",costPerGraphRelative
+		# print "Absolute cost per graph = ",costPerGraph
+		# print "Relative cost per graph = ",costPerGraphRelative
 		return costPerGraph,costPerGraphRelative
+
 
 	def averagePopCost(self):
 		# return the average cost of networks in population
@@ -463,12 +465,13 @@ class Population(object):
 	def selection(self, costPerGraph, c=0.5):
 		fitness = [1-i for i in costPerGraph]
 		rank = scipy.stats.rankdata(fitness)
-		print "Fitness:",fitness,"\nRank:",rank
+		# print "Fitness:",fitness,"\nRank:",rank
 		# ELITISM
 		# Initiate a new pop with the best graph
-		print "Argmax =",np.argmax(fitness)
+		# print "Argmax =",np.argmax(fitness)
 		newPop = [ copy.deepcopy(self.graphs[np.argmax(fitness)]) ]
 		# print "BEST:\tr=",rank[np.argmax(fitness)],"\tfit=",fitness[np.argmax(fitness)]
+		print "Clique = ",newPop[0].costClique,"\tSW =",newPop[0].costSmallWorld, "\tDeg =",newPop[0].costDegree
 		# RANKING
 		Wr = [] # Proba of reproducing (non-normalized)
 		for i,e in enumerate(self.graphs):
@@ -530,6 +533,9 @@ class Population(object):
 			minGenerationCost.append(min(popAboluteCost))
 			bestGenerationCost.append(self.graphs[0].cost)
 			aveGenerationCost.append(self.averagePopCost())
+			# minGenerationCost.append(self.graphs[0].costClique)
+			# bestGenerationCost.append(self.graphs[0].costSmallWorld)
+			# aveGenerationCost.append(self.graphs[0].costDegree)
 			# Selection
 			self.selection(costPerGraph=popRelativeCost, c=c)
 			# Mutation of each graph (except the best one)
@@ -538,7 +544,7 @@ class Population(object):
 			# Crossing over
 			self.crossingOver(tx=cro_rate)
 			self.graphs[0].__str__(ID="0-"+str(generationNumber)+"-")
-			self.graphs[1].__str__(ID="1-"+str(generationNumber)+"-")
+			# self.graphs[1].__str__(ID="1-"+str(generationNumber)+"-")
 		self.graphs[0].fileCytoscape()
 		# Costs plot:
 		pyplot.plot(range(0,generation,1), minGenerationCost, label='Minimum', linestyle='-', marker='.', linewidth=1, markersize=5, color='red')
@@ -610,5 +616,5 @@ def main():
 
 #main()
 
-P=Population(m=10,n=25)
-P.updatePop(generation=10,gamma=2.2,c=0.5,mut_rate=0.15,cro_rate=0.05)
+P=Population(m=100,n=200)
+P.updatePop(generation=100,gamma=2.2,c=0.99,mut_rate=0.0005,cro_rate=0.001)
