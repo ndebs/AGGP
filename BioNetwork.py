@@ -105,12 +105,7 @@ class Network(object):
 			for j in xrange(i+1,self.n,1):
 				rand_freq = random.uniform(0,1)
 				if rand_freq < mut_rate:
-					if self.g[i,j] == 1:
-						self.g[i,j] = 0
-						self.g[j,i] = self.g[i,j]
-					if self.g[i,j] == 0:
-						self.g[i,j] = 1
-						self.g[j,i] =  self.g[i,j]
+					self.g[i,j] = np.random.binomial(n=1, p=2/float(self.n), size=None)
 			# Prevent the mutation of a graph with a non-connected node
 			if (sum(self.g[i])==0):
 				# Additon of a random vertex
@@ -119,6 +114,28 @@ class Network(object):
 					r = np.random.random_integers(low=0, high=self.n-1, size=None)
 				self.g[i,r] = 1
 				self.g[r,i] = self.g[i,r] # Symmetrical matrix
+
+
+
+	# def mutation(self,mut_rate):
+	# 	for i in xrange(0,self.n,1):
+	# 		for j in xrange(i+1,self.n,1):
+	# 			rand_freq = random.uniform(0,1)
+	# 			if rand_freq < mut_rate:
+	# 				if self.g[i,j] == 1:
+	# 					self.g[i,j] = 0
+	# 					self.g[j,i] = self.g[i,j]
+	# 				if self.g[i,j] == 0:
+	# 					self.g[i,j] = 1
+	# 					self.g[j,i] =  self.g[i,j]
+	# 		# Prevent the mutation of a graph with a non-connected node
+	# 		if (sum(self.g[i])==0):
+	# 			# Additon of a random vertex
+	# 			r = np.random.random_integers(low=0, high=self.n-1, size=None)
+	# 			while (i==r):
+	# 				r = np.random.random_integers(low=0, high=self.n-1, size=None)
+	# 			self.g[i,r] = 1
+	# 			self.g[r,i] = self.g[i,r] # Symmetrical matrix
 
 
 
@@ -149,7 +166,10 @@ class Network(object):
 				c[i]=(2*c[i])/(k[i]*(k[i]-1))
 			if c[i]<=0:
 				c[i]=0.0000000001
-			log_k[i]=math.log(k[i],10)
+			if (k[i] > 0):
+				log_k[i]=math.log(k[i],10)
+			else: # Prevent math.domain error
+				log_k[i]=10**-10
 			log_c[i]=math.log(c[i],10)
 			i+=1
 
@@ -444,7 +464,7 @@ class Population(object):
 			# print "Graph cost", e.cost
 			costPerGraph.append(e.cost)
 			# Relative costs
-			e.costRelative = costPerGraphClique[i]/float(3*maxCosts[0])+costPerGraphSwallWorld[i]/float(3*maxCosts[1])+costPerGraphDegree[i]/float(3*maxCosts[2])
+			e.costRelative = costPerGraphClique[i]/float(3*maxCosts[0])+costPerGraphSwallWorld[i]/float(3*maxCosts[1])+2*costPerGraphDegree[i]/float(3*maxCosts[2])
 			costPerGraphRelative.append(e.costRelative)
 		# print "Absolute cost per graph = ",costPerGraph
 		# print "Relative cost per graph = ",costPerGraphRelative
@@ -546,13 +566,14 @@ class Population(object):
 			self.graphs[0].__str__(ID="0-"+str(generationNumber)+"-")
 			# self.graphs[1].__str__(ID="1-"+str(generationNumber)+"-")
 		self.graphs[0].fileCytoscape()
+		self.graphs[0].plot_freq_degree(gamma_opti=2.2)
 		# Costs plot:
 		pyplot.plot(range(0,generation,1), minGenerationCost, label='Minimum', linestyle='-', marker='.', linewidth=1, markersize=5, color='red')
 		pyplot.plot(range(0,generation,1), bestGenerationCost, label='Best conserved', linestyle='--', marker='.', linewidth=1, markersize=5, color='green')
 		pyplot.plot(range(0,generation,1), aveGenerationCost, label='Average', linestyle='--', marker='.', linewidth=1, markersize=5, color='blue')
 		# Plot Parameters
-		pyplot.xlabel("Shortest path length")
-		pyplot.ylabel("Number")
+		pyplot.xlabel("Generation")
+		pyplot.ylabel("Cost")
 		pyplot.legend(fontsize=10) #adds a legend
 		pyplot.show()
 
@@ -616,5 +637,5 @@ def main():
 
 #main()
 
-P=Population(m=100,n=200)
-P.updatePop(generation=100,gamma=2.2,c=0.99,mut_rate=0.0005,cro_rate=0.001)
+P=Population(m=100,n=100)
+P.updatePop(generation=70,gamma=2.2,c=0.99,mut_rate=0.01,cro_rate=0.001)
