@@ -67,13 +67,13 @@ class Network(object):
 		# pyplot.savefig(ID+"NetworkX_plot4-random.png")
 		# pyplot.clf()
 		# Draw the graph with a spectral layout.
-		networkx.draw_spectral(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
-		pyplot.savefig(ID+"NetworkX_plot5-spectral.png")
-		pyplot.clf()
-		# # Draw the graph with a spring layout.
-		# networkx.draw_spring(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
-		# pyplot.savefig(ID+"NetworkX_plot6-spring.png")
+		# networkx.draw_spectral(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
+		# pyplot.savefig(ID+"NetworkX_plot5-spectral.png")
 		# pyplot.clf()
+		# Draw the graph with a spring layout.
+		networkx.draw_spring(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
+		pyplot.savefig(ID+"NetworkX_plot6-spring.png")
+		pyplot.clf()
 		# # Draw the graph with a shell layout.
 		# networkx.draw_shell(gx, with_labels=numlabels, node_size=size_deg, linewidths=0, width=0.5, alpha=1, cmap=nodecmap, node_color=deg, edge_color=edgecolor)
 		# pyplot.savefig(ID+"NetworkX_plot7-shell.png")
@@ -315,7 +315,7 @@ class Network(object):
 			#compute cost (=SCE)
 			fk= freq_list[i]
 			k= degrees[i]
-			self.costDegree += (fk - self.P(k,gamma))**2
+			self.costDegree += math.sqrt(k)*(fk - self.P(k,gamma))**2
 
 	def plot_freq_degree(self,gamma_opti):
 		y_theo= []
@@ -638,4 +638,4 @@ def main():
 #main()
 
 P=Population(m=100,n=100)
-P.updatePop(generation=70,gamma=2.2,c=0.99,mut_rate=0.01,cro_rate=0.001)
+P.updatePop(generation=30,gamma=2.0,c=0.99,mut_rate=0.01,cro_rate=0.001)
