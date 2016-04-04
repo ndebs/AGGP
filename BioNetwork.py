@@ -83,7 +83,7 @@ class Network(object):
 		return "\nNetwork display saved.\n"
 
 	def fileCytoscape(self):
-		f=open('graphCytoscape1.txt', 'w')
+		f=open('graphCytoscape4.txt', 'w')
 		for i in xrange(0,self.n,1):
 			for j in xrange(i+1,self.n,1):
 				if self.g[i,j]==1:
@@ -175,7 +175,7 @@ class Network(object):
 
 		a,b=np.polyfit(log_k,log_c,1) # polynomial regression, degree one, older version
 		for i, e in enumerate(log_k):
-			self.costClique+=(a*e-log_c[i])**2 + 0.05*b # b is minor in the calculation of cost
+			self.costClique+=(a*e-log_c[i])**2 #+ 0.05*b # b is minor in the calculation of cost
 		
 
 
@@ -464,7 +464,7 @@ class Population(object):
 			# print "Graph cost", e.cost
 			costPerGraph.append(e.cost)
 			# Relative costs
-			e.costRelative = 0.9*costPerGraphClique[i]/float(3*maxCosts[0])+1.2*costPerGraphSwallWorld[i]/float(3*maxCosts[1])+2.5*costPerGraphDegree[i]/float(3*maxCosts[2])
+			e.costRelative = costPerGraphClique[i]/float(3*maxCosts[0])+1.6*costPerGraphSwallWorld[i]/float(3*maxCosts[1])+2*costPerGraphDegree[i]/float(3*maxCosts[2])
 			costPerGraphRelative.append(e.costRelative)
 		# print "Absolute cost per graph = ",costPerGraph
 		# print "Relative cost per graph = ",costPerGraphRelative
@@ -641,4 +641,7 @@ P=Population(m=100,n=100)
 P.updatePop(generation=30,gamma=2.2,c=0.99,mut_rate=0.02,cro_rate=0.001)
 
 # GraphCytoscape.txt: 0.8 pour clique cost, 1 pour small World, 2 pour degree 
-# GraphCytoscape.txt: 0.9 pour clique cost, 1.2 pour small World, 2.5 pour degree 
+# GraphCytoscape1.txt: 0.9 pour clique cost, 1.2 pour small World, 2.5 pour degree 
+# GraphCytoscape2.txt: 0.9 pour clique cost, 1.6 pour small World, 2.5 pour degree 
+# GraphCytoscape3.txt: 1 pour clique cost, 1.6 pour small World, 2 pour degree 
+# GraphCytoscape4.txt: 0.8 pour clique cost, 1.1 pour small World, 2 pour degree 
