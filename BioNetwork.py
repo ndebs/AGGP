@@ -83,7 +83,7 @@ class Network(object):
 		return "\nNetwork display saved.\n"
 
 	def fileCytoscape(self):
-		f=open('graphCytoscape.txt', 'w')
+		f=open('graphCytoscape1.txt', 'w')
 		for i in xrange(0,self.n,1):
 			for j in xrange(i+1,self.n,1):
 				if self.g[i,j]==1:
@@ -166,7 +166,7 @@ class Network(object):
 				c[i]=(2*c[i])/(k[i]*(k[i]-1))
 			if c[i]<=0:
 				c[i]=0.0000000001
-			if (k[i] > 0):
+			if k[i] > 0:
 				log_k[i]=math.log(k[i],10)
 			else: # Prevent math.domain error
 				log_k[i]=10**-10
@@ -175,7 +175,7 @@ class Network(object):
 
 		a,b=np.polyfit(log_k,log_c,1) # polynomial regression, degree one, older version
 		for i, e in enumerate(log_k):
-			self.costClique+=(a*e-e)**2 + 0.05*b*0 # b is minor in the calculation of cost
+			self.costClique+=(a*e-log_c[i])**2 + 0.05*b # b is minor in the calculation of cost
 		
 
 
@@ -315,7 +315,7 @@ class Network(object):
 			#compute cost (=SCE)
 			fk= freq_list[i]
 			k= degrees[i]
-			self.costDegree += math.sqrt(k)*(fk - self.P(k,gamma))**2
+			self.costDegree += (math.log(1+fk,10) - math.log(1+self.P(k,gamma),10))**2
 
 	def plot_freq_degree(self,gamma_opti):
 		y_theo= []
@@ -464,7 +464,7 @@ class Population(object):
 			# print "Graph cost", e.cost
 			costPerGraph.append(e.cost)
 			# Relative costs
-			e.costRelative = costPerGraphClique[i]/float(3*maxCosts[0])+costPerGraphSwallWorld[i]/float(3*maxCosts[1])+2*costPerGraphDegree[i]/float(3*maxCosts[2])
+			e.costRelative = 0.9*costPerGraphClique[i]/float(3*maxCosts[0])+1.2*costPerGraphSwallWorld[i]/float(3*maxCosts[1])+2.5*costPerGraphDegree[i]/float(3*maxCosts[2])
 			costPerGraphRelative.append(e.costRelative)
 		# print "Absolute cost per graph = ",costPerGraph
 		# print "Relative cost per graph = ",costPerGraphRelative
@@ -638,4 +638,7 @@ def main():
 #main()
 
 P=Population(m=100,n=100)
-P.updatePop(generation=30,gamma=2.0,c=0.99,mut_rate=0.01,cro_rate=0.001)
+P.updatePop(generation=30,gamma=2.2,c=0.99,mut_rate=0.02,cro_rate=0.001)
+
+# GraphCytoscape.txt: 0.8 pour clique cost, 1 pour small World, 2 pour degree 
+# GraphCytoscape.txt: 0.9 pour clique cost, 1.2 pour small World, 2.5 pour degree 
