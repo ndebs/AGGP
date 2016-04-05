@@ -82,8 +82,8 @@ class Network(object):
 		# pyplot.show()
 		return "\nNetwork display saved.\n"
 
-	def fileCytoscape(self):
-		f=open('graphCytoscape4.txt', 'w')
+	def fileCytoscape(self,ID=''):
+		f=open(ID+'graphCytoscape4.txt', 'w')
 		for i in xrange(0,self.n,1):
 			for j in xrange(i+1,self.n,1):
 				if self.g[i,j]==1:
@@ -464,7 +464,7 @@ class Population(object):
 			# print "Graph cost", e.cost
 			costPerGraph.append(e.cost)
 			# Relative costs
-			e.costRelative = costPerGraphClique[i]/float(3*maxCosts[0])+1.6*costPerGraphSwallWorld[i]/float(3*maxCosts[1])+2*costPerGraphDegree[i]/float(3*maxCosts[2])
+			e.costRelative = 0.8*costPerGraphClique[i]/float(3*maxCosts[0])+1.0*costPerGraphSwallWorld[i]/float(3*maxCosts[1])+2*costPerGraphDegree[i]/float(3*maxCosts[2])
 			costPerGraphRelative.append(e.costRelative)
 		# print "Absolute cost per graph = ",costPerGraph
 		# print "Relative cost per graph = ",costPerGraphRelative
@@ -565,12 +565,12 @@ class Population(object):
 			self.crossingOver(tx=cro_rate)
 			self.graphs[0].__str__(ID="0-"+str(generationNumber)+"-")
 			# self.graphs[1].__str__(ID="1-"+str(generationNumber)+"-")
-		self.graphs[0].fileCytoscape()
+			self.graphs[0].fileCytoscape(ID="0-"+str(generationNumber)+"-")
 		self.graphs[0].plot_freq_degree(gamma_opti=2.2)
 		# Costs plot:
 		pyplot.plot(range(0,generation,1), minGenerationCost, label='Minimum', linestyle='-', marker='.', linewidth=1, markersize=5, color='red')
-		pyplot.plot(range(0,generation,1), bestGenerationCost, label='Best conserved', linestyle='--', marker='.', linewidth=1, markersize=5, color='green')
-		pyplot.plot(range(0,generation,1), aveGenerationCost, label='Average', linestyle='--', marker='.', linewidth=1, markersize=5, color='blue')
+		# pyplot.plot(range(0,generation,1), bestGenerationCost, label='Best conserved', linestyle='--', marker='.', linewidth=1, markersize=5, color='green')
+		# pyplot.plot(range(0,generation,1), aveGenerationCost, label='Average', linestyle='--', marker='.', linewidth=1, markersize=5, color='blue')
 		# Plot Parameters
 		pyplot.xlabel("Generation")
 		pyplot.ylabel("Cost")
@@ -638,7 +638,7 @@ def main():
 #main()
 
 P=Population(m=100,n=100)
-P.updatePop(generation=30,gamma=2.2,c=0.99,mut_rate=0.02,cro_rate=0.001)
+P.updatePop(generation=50,gamma=2.2,c=0.99,mut_rate=0.02,cro_rate=0.001)
 
 # GraphCytoscape.txt: 0.8 pour clique cost, 1 pour small World, 2 pour degree 
 # GraphCytoscape1.txt: 0.9 pour clique cost, 1.2 pour small World, 2.5 pour degree 
